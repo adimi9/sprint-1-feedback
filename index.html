@@ -119,6 +119,87 @@
             th, td { padding: 10px; }
         }
     </style>
+
+    <script>
+        (function () {
+          // Helper: safely get text content
+          const getText = (el) => (el ? el.textContent.trim() : "");
+        
+          // 1) Collect ratings from all team cards
+          const ratingBadges = Array.from(document.querySelectorAll(".team-card .rating-badge"));
+          const ratings = ratingBadges.map(badge => {
+            const m = getText(badge).match(/(\d+(?:\.\d+)?)\s*\/\s*5/);
+            return m ? parseFloat(m[1]) : null;
+          }).filter(n => typeof n === "number" && !Number.isNaN(n));
+        
+          // Compute average rating (out of 5)
+          let avgRating = null;
+          if (ratings.length > 0) {
+            const sum = ratings.reduce((a, b) => a + b, 0);
+            avgRating = sum / ratings.length;
+          }
+        
+          // 2) Compute "Yes" continuation rate
+          // We look for detail-row where label is "Continue Beyond Sprint:"
+          const continueRows = Array.from(document.querySelectorAll(".team-card .detail-row"))
+            .filter(row => {
+              const label = row.querySelector(".detail-label");
+              return getText(label).toLowerCase().startsWith("continue beyond sprint");
+            });
+        
+          const totalConsidered = continueRows.length; // denominator for percentage
+          let yesCount = 0;
+        
+          continueRows.forEach(row => {
+            const value = row.querySelector(".detail-value");
+            const text = getText(value).toLowerCase();
+            // Starts with "yes"
+            if (text.startsWith("yes")) {
+              yesCount += 1;
+            }
+          });
+        
+          let yesRatePct = null;
+          if (totalConsidered > 0) {
+            yesRatePct = (yesCount / totalConsidered) * 100;
+          }
+        
+          // 3) Update the top metric cards by their labels
+          const metricCards = Array.from(document.querySelectorAll(".metrics-grid .metric-card"));
+          const findMetricByLabel = (labelText) => {
+            const lowerTarget = labelText.toLowerCase();
+            return metricCards.find(card => {
+              const labelEl = card.querySelector(".metric-label");
+              return labelEl && getText(labelEl).toLowerCase() === lowerTarget;
+            });
+          };
+        
+          // Update Average Rating
+          if (avgRating !== null) {
+            const avgCard = findMetricByLabel("Average Rating");
+            if (avgCard) {
+              const valueEl = avgCard.querySelector(".metric-value");
+              if (valueEl) {
+                // Round to one decimal place
+                valueEl.textContent = (Math.round(avgRating * 10) / 10).toFixed(1);
+              }
+            }
+          }
+        
+          // Update Continuation Rate (Yes/Maybe/Unsure) with % of "Yes"
+          if (yesRatePct !== null) {
+            const contCard = findMetricByLabel("Continuation Rate (Yes/Maybe/Unsure)");
+            if (contCard) {
+              const valueEl = contCard.querySelector(".metric-value");
+              if (valueEl) {
+                // Round to nearest whole number (or keep 0 decimals)
+                valueEl.textContent = `${Math.round(yesRatePct)}%`;
+              }
+            }
+          }
+        
+        })();
+    </script>
 </head>
 <body>
 <div class="dashboard-container">
