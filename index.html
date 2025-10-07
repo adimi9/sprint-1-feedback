@@ -1,16 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>SCG AI-First Sprint Feedback Dashboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -18,7 +13,6 @@
             padding: 20px;
             color: #333;
         }
-
         .dashboard-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -28,518 +22,455 @@
             overflow: hidden;
             backdrop-filter: blur(10px);
         }
-
         .header {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             padding: 30px;
             text-align: center;
             color: white;
         }
-
         .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .content {
-            padding: 30px;
-        }
+        .header p { font-size: 1.1rem; opacity: 0.9; }
+        .content { padding: 30px; }
 
         .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px; margin-bottom: 40px;
         }
-
         .metric-card {
             background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
+            padding: 25px; border-radius: 15px; text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        .metric-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .metric-value { font-size: 2.5rem; font-weight: bold; color: #2d3748; margin-bottom: 5px; }
+        .metric-label { font-size: 1rem; color: #4a5568; font-weight: 500; }
 
-        .metric-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .metric-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #2d3748;
-            margin-bottom: 5px;
-        }
-
-        .metric-label {
-            font-size: 1rem;
-            color: #4a5568;
-            font-weight: 500;
-        }
-
-        .section {
-            margin-bottom: 40px;
-        }
-
+        .section { margin-bottom: 40px; }
         .section-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #2d3748;
-            border-left: 4px solid #4facfe;
-            padding-left: 15px;
+            font-size: 1.8rem; font-weight: 600; margin-bottom: 20px; color: #2d3748;
+            border-left: 4px solid #4facfe; padding-left: 15px;
         }
 
         .team-comparison {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px; margin-bottom: 40px;
         }
-
         .team-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            background: white; border-radius: 15px; padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: 2px solid transparent;
         }
-
-        .team-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-            border-color: #4facfe;
-        }
-
-        .team-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .team-name {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #2d3748;
-        }
-
-        .rating-badge {
-            padding: 8px 16px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 1rem;
-        }
-
-        .rating-4 {
-            background: linear-gradient(135deg, #48bb78, #68d391);
-            color: white;
-        }
-
-        .rating-3 {
-            background: linear-gradient(135deg, #ed8936, #f6ad55);
-            color: white;
-        }
-
-        .team-details {
-            margin-bottom: 15px;
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding: 5px 0;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: #4a5568;
-            flex: 1;
-        }
-
-        .detail-value {
-            flex: 2;
-            color: #2d3748;
-        }
-
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .status-no {
-            background: #fed7d7;
-            color: #c53030;
-        }
-
-        .status-maybe {
-            background: #fef5e7;
-            color: #d69e2e;
-        }
-
-        .status-some {
-            background: #c6f6d5;
-            color: #2f855a;
-        }
-
+        .team-card:hover { transform: translateY(-3px); box-shadow: 0 12px 35px rgba(0,0,0,0.15); border-color: #4facfe; }
+        .team-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; }
+        .team-name { font-size: 1.2rem; font-weight: 700; color: #2d3748; }
+        .rating-badge { padding: 8px 16px; border-radius: 25px; font-weight: bold; font-size: 1rem; }
+        .rating-5 { background: linear-gradient(135deg,#38b2ac,#4fd1c5); color: #fff; }
+        .rating-4 { background: linear-gradient(135deg, #48bb78, #68d391); color: white; }
+        .rating-3 { background: linear-gradient(135deg, #ed8936, #f6ad55); color: white; }
+        .team-details { margin-bottom: 15px; }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; padding: 5px 0; gap: 16px; }
+        .detail-label { font-weight: 600; color: #4a5568; flex: 1; }
+        .detail-value { flex: 2; color: #2d3748; }
+        .status-badge { padding: 4px 12px; border-radius: 15px; font-size: 0.85rem; font-weight: 500; }
+        .status-no { background: #fed7d7; color: #c53030; }
+        .status-maybe { background: #fef5e7; color: #d69e2e; }
+        .status-some { background: #c6f6d5; color: #2f855a; }
+        .status-yes { background: #c6f6d5; color: #276749; }
+        .status-team { background: #bee3f8; color: #2b6cb0; }
         .comparison-table {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+            background: white; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); margin-bottom: 30px;
         }
-
         .table-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            font-size: 1.2rem;
-            font-weight: 600;
+            color: white; padding: 20px; font-size: 1.2rem; font-weight: 600;
         }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        th { background: #f7fafc; font-weight: 600; color: #2d3748; }
+        tr:hover { background: #f7fafc; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .insight-card { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 20px; border-radius: 15px; transition: transform 0.3s ease; }
+        .insight-card:hover { transform: translateY(-3px); }
+        .insight-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; color: #2d3748; }
+        .insight-text { color: #4a5568; line-height: 1.5; }
 
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        th {
-            background: #f7fafc;
-            font-weight: 600;
-            color: #2d3748;
-        }
-
-        tr:hover {
-            background: #f7fafc;
-        }
-
-        .insights-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .insight-card {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            padding: 20px;
-            border-radius: 15px;
-            transition: transform 0.3s ease;
-        }
-
-        .insight-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .insight-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #2d3748;
-        }
-
-        .insight-text {
-            color: #4a5568;
-            line-height: 1.5;
-        }
-
-        .team-members {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 10px;
-        }
-
-        .member {
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            color: #4a5568;
-        }
-
-        .member strong {
-            color: #2d3748;
-        }
-
-        .response-id {
-            font-size: 0.8rem;
-            color: #718096;
-            margin-bottom: 5px;
-        }
+        .team-members { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 10px; }
+        .member { margin-bottom: 5px; font-size: 0.9rem; color: #4a5568; }
+        .member strong { color: #2d3748; }
+        .response-id { font-size: 0.8rem; color: #718096; margin-bottom: 5px; }
 
         @media (max-width: 768px) {
-            .dashboard-container {
-                margin: 10px;
-                border-radius: 15px;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-            
-            .header {
-                padding: 20px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .team-comparison {
-                grid-template-columns: 1fr;
-            }
-            
-            .metrics-grid {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            }
-            
-            .team-card {
-                padding: 20px;
-            }
-            
-            table {
-                font-size: 0.9rem;
-            }
-            
-            th, td {
-                padding: 10px;
-            }
+            .dashboard-container { margin: 10px; border-radius: 15px; }
+            .content { padding: 20px; }
+            .header { padding: 20px; }
+            .header h1 { font-size: 2rem; }
+            .team-comparison { grid-template-columns: 1fr; }
+            .metrics-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+            .team-card { padding: 20px; }
+            table { font-size: 0.9rem; }
+            th, td { padding: 10px; }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="header">
-            <h1>🚀 SCG AI-First Sprint 1 Feedback Dashboard</h1>
-            <p>Comprehensive analysis of team experiences and outcomes</p>
+<div class="dashboard-container">
+    <div class="header">
+        <h1>🚀 SCG AI-First Sprint 1 Feedback Dashboard</h1>
+        <p>Comprehensive analysis of team experiences and outcomes</p>
+    </div>
+
+    <div class="content">
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value">3.8</div>
+                <div class="metric-label">Average Rating</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">6</div>
+                <div class="metric-label">Teams Participated</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">75%</div>
+                <div class="metric-label">Continuation Rate (Yes/Maybe)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">88%</div>
+                <div class="metric-label">Team/Beyond Team Adoption</div>
+            </div>
         </div>
 
-        <div class="content">
-            <!-- Key Metrics -->
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-value">3.5</div>
-                    <div class="metric-label">Average Rating</div>
+        <!-- Team Overview Cards -->
+        <div class="section">
+            <h2 class="section-title">📊 Team Overview</h2>
+            <div class="team-comparison">
+                <!-- AI Can Do It -->
+                <div class="team-card">
+                    <div class="team-header">
+                        <div class="team-name">AI Can Do It</div>
+                        <div class="rating-badge rating-3">3/5</div>
+                    </div>
+                    <div class="response-id">Response ID: 68d3ad7d1657665fe49832c7</div>
+                    <div class="team-details">
+                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Digital Governance</div></div>
+                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Wed, 24 Sep 2025 04:36 PM</div></div>
+                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-no">No one</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
+                    </div>
+                    <div class="team-members">
+                        <div class="member"><strong>Team Lead:</strong> Choo Zhi Han</div>
+                        <div class="member"><strong>Member 1:</strong> Alvin Chew</div>
+                        <div class="member"><strong>Member 2:</strong> N/A</div>
+                    </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value">2</div>
-                    <div class="metric-label">Teams Participated</div>
+
+                <!-- ReADI -->
+                <div class="team-card">
+                    <div class="team-header">
+                        <div class="team-name">ReADI (Real-time Analytics & Digital Intelligence)</div>
+                        <div class="rating-badge rating-4">4/5</div>
+                    </div>
+                    <div class="response-id">Response ID: 68cd4544178ee246e6181d32</div>
+                    <div class="team-details">
+                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Procurement</div></div>
+                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Fri, 19 Sep 2025 07:57 PM</div></div>
+                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe, depends on support/resources</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-some">Some people beyond my immediate team</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe</span></div></div>
+                    </div>
+                    <div class="team-members">
+                        <div class="member"><strong>Team Lead:</strong> Ong Huo Xing</div>
+                        <div class="member"><strong>Member 1:</strong> Luo Yihua</div>
+                        <div class="member"><strong>Member 2:</strong> Lim Soon Siang</div>
+                    </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value">50%</div>
-                    <div class="metric-label">Continuation Rate</div>
+
+                <!-- Minute Makers -->
+                <div class="team-card">
+                    <div class="team-header">
+                        <div class="team-name">Minute Makers</div>
+                        <div class="rating-badge rating-4">4/5</div>
+                    </div>
+                    <div class="response-id">Response ID: 68e4c12243683b1a2889f8e9</div>
+                    <div class="team-details">
+                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Org Excellence</div></div>
+                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 03:28 PM</div></div>
+                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe, depends on support/resources</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-team">My immediate team</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
+                    </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value">50%</div>
-                    <div class="metric-label">Some/Beyond Team Adoption</div>
+
+                <!-- AI -->
+                <div class="team-card">
+                    <div class="team-header">
+                        <div class="team-name">AI</div>
+                        <div class="rating-badge rating-5">5/5</div>
+                    </div>
+                    <div class="response-id">Response ID: 68e4c1714e938aed62008005</div>
+                    <div class="team-details">
+                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Digital Governance</div></div>
+                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 03:29 PM</div></div>
+                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-some">Some people beyond my immediate team</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
+                    </div>
+                </div>
+
+                <!-- SumUpFollowUp -->
+                <div class="team-card">
+                    <div class="team-header">
+                        <div class="team-name">SumUpFollowUp</div>
+                        <div class="rating-badge rating-4">4/5</div>
+                    </div>
+                    <div class="response-id">Response ID: 68e4c65413072300a6673fbf</div>
+                    <div class="team-details">
+                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Digital Governance</div></div>
+                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 03:50 PM</div></div>
+                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-some">Some people beyond my immediate team</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe</span></div></div>
+                    </div>
+                </div>
+
+                <!-- OE Data Team 1 (3 responses summarized) -->
+                <div class="team-card">
+                    <div class="team-header">
+                        <div class="team-name">OE Data Team 1</div>
+                        <div class="rating-badge rating-4">3–4/5</div>
+                    </div>
+                    <div class="response-id">Responses: 68e4cac4..., 68e4caff..., 68e4cbac...</div>
+                    <div class="team-details">
+                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Org Excellence</div></div>
+                        <div class="detail-row"><div class="detail-label">Timestamp(s):</div><div class="detail-value">Tue, 07 Oct 2025 04:09–04:13 PM</div></div>
+                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-yes">Yes / Yes (unsure of timeline) / Yes, definitely</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-team">My immediate team / I'll definitely use it</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe</span></div></div>
+                    </div>
+                </div>
+
+                <!-- T3 (Tender Tech Titans) -->
+                <div class="team-card">
+                    <div class="team-header">
+                        <div class="team-name">T3 (Tender Tech Titans)</div>
+                        <div class="rating-badge rating-3">3/5</div>
+                    </div>
+                    <div class="response-id">Response ID: 68e4d47643683b1a28906dee</div>
+                    <div class="team-details">
+                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Procurement</div></div>
+                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 04:51 PM</div></div>
+                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-no">No / Unsure</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-team">My immediate team</span></div></div>
+                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Team Overview Cards -->
-            <div class="section">
-                <h2 class="section-title">📊 Team Overview</h2>
-                <div class="team-comparison">
-                    <!-- AI Can Do It Team -->
-                    <div class="team-card">
-                        <div class="team-header">
-                            <div class="team-name">AI Can Do It</div>
-                            <div class="rating-badge rating-3">3/5</div>
-                        </div>
-                        <div class="response-id">Response ID: 68d3ad7d1657665fe49832c7</div>
-                        <div class="team-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Division:</div>
-                                <div class="detail-value">Digital Governance</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Timestamp:</div>
-                                <div class="detail-value">Wed, 24 Sep 2025 04:36:13 PM</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Continue Beyond Sprint:</div>
-                                <div class="detail-value"><span class="status-badge status-no">No</span></div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Adoption Level:</div>
-                                <div class="detail-value"><span class="status-badge status-no">No one</span></div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Follow-up Interest:</div>
-                                <div class="detail-value"><span class="status-badge status-no">No</span></div>
-                            </div>
-                        </div>
-                        <div class="team-members">
-                            <div class="member"><strong>Team Lead:</strong> Choo Zhi Han</div>
-                            <div class="member"><strong>Member 1:</strong> Alvin Chew</div>
-                            <div class="member"><strong>Member 2:</strong> N/A</div>
-                        </div>
-                    </div>
+        <!-- Detailed Comparison Tables -->
+        <div class="section">
+            <h2 class="section-title">📋 Detailed Feedback Comparison</h2>
 
-                    <!-- ReADI Team -->
-                    <div class="team-card">
-                        <div class="team-header">
-                            <div class="team-name">ReADI (Real-time Analytics & Digital Intelligence)</div>
-                            <div class="rating-badge rating-4">4/5</div>
-                        </div>
-                        <div class="response-id">Response ID: 68cd4544178ee246e6181d32</div>
-                        <div class="team-details">
-                            <div class="detail-row">
-                                <div class="detail-label">Division:</div>
-                                <div class="detail-value">Procurement</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Timestamp:</div>
-                                <div class="detail-value">Fri, 19 Sep 2025 07:57:56 PM</div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Continue Beyond Sprint:</div>
-                                <div class="detail-value"><span class="status-badge status-maybe">Maybe, depends on support/resources</span></div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Adoption Level:</div>
-                                <div class="detail-value"><span class="status-badge status-some">Some people beyond my immediate team</span></div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">Follow-up Interest:</div>
-                                <div class="detail-value"><span class="status-badge status-maybe">Maybe</span></div>
-                            </div>
-                        </div>
-                        <div class="team-members">
-                            <div class="member"><strong>Team Lead:</strong> Ong Huo Xing</div>
-                            <div class="member"><strong>Member 1:</strong> Luo Yihua</div>
-                            <div class="member"><strong>Member 2:</strong> Lim Soon Siang</div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Sprint Experience & Challenges -->
+            <div class="comparison-table">
+                <div class="table-header">Sprint Experience & Challenges</div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>What Worked Best</th>
+                        <th>Biggest Challenge</th>
+                        <th>Suggestions for Improvement</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><strong>AI Can Do It</strong></td>
+                        <td>Chance to learn new skills like video creation.</td>
+                        <td>Stress and overtime as cannot deprioritise work to do this sprint.</td>
+                        <td>Consider one that is not about trialling new AI solutions, but about going from POC to production and active usage, and delivering steady outcomes! The participants can be (but need not be limited to) the POCs from earlier sprints. The cross-divisional aspect can be about the product finding new users.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ReADI</strong></td>
+                        <td>1) Availability of AI clinics support to advise, bounce ideas on suitable platforms. 2) Prompt support to allow account creation to start working on the problem.</td>
+                        <td>Resource constraint balancing BAU work, OKR delivery and working on Sprint solutions.</td>
+                        <td>Nil. Thanks again for organizing this.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Minute Makers</strong></td>
+                        <td>Clear instructions and timeline; good variety of resources and support.</td>
+                        <td>Short timeline.</td>
+                        <td>Nil.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AI</strong></td>
+                        <td>Experimentation cycle: backtrack, review, adjust, try again.</td>
+                        <td>Making videos; zero prior experience.</td>
+                        <td>Nope. It was a great and fun experience.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SumUpFollowUp</strong></td>
+                        <td>Collaboration within PSIRC, common narrative across entries.</td>
+                        <td>Lack of experience with video editing and voice narration generation apps.</td>
+                        <td>Provide a list of useful tools (video editing, voice narration) for newcomers.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OE Data Team 1</strong></td>
+                        <td>Working together as a team; AI Clinics helped a lot (thinking through solutions and tooling).</td>
+                        <td>Finding a good AI tool for quantitative analysis; making the video; lack of information on possible tools.</td>
+                        <td>More time; consider Fri learning cadence; earlier comms and kickoff; milestones and check-ins; share tips on uploading big videos to Slack.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>T3 (Tender Tech Titans)</strong></td>
+                        <td>Quickly narrowed scope; coordinated towards goal.</td>
+                        <td>Couldn’t get Copilot license by deadline; video upload only possible via mobile; questions about fairness of judging vs pre-existing products.</td>
+                        <td>Address perceived differential support; clarify judging re: pre-existing work.</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
 
-            <!-- Detailed Comparison Tables -->
-            <div class="section">
-                <h2 class="section-title">📋 Detailed Feedback Comparison</h2>
-                
-                <div class="comparison-table">
-                    <div class="table-header">Sprint Experience & Challenges</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Team</th>
-                                <th>What Worked Best</th>
-                                <th>Biggest Challenge</th>
-                                <th>Suggestions for Improvement</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>AI Can Do It</strong></td>
-                                <td>Chance to learn new skills like video creation</td>
-                                <td>Stress and overtime as cannot deprioritise work to do this sprint</td>
-                                <td>Consider one that is not about trialling new AI solutions, but about going from POC to production and active usage, and delivering steady outcomes! The participants can be (but need not be limited to) the POCs from earlier sprints. The cross-divisional aspect can be about the product finding new users</td>
-                            </tr>
-                            <tr>
-                                <td><strong>ReADI</strong></td>
-                                <td>1) Availability of AI clinics support to advise, bounce ideas on the suitable platforms for consideration. 2) prompt support to allow account creation to allow the team to start working on the problem statement</td>
-                                <td>Resource constraint balancing BAU work, OKR delivery and working on Sprint solutions</td>
-                                <td>Nil. Thanks again for organizing this</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="comparison-table">
-                    <div class="table-header">Future Plans & Development</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Team</th>
-                                <th>Future Vision</th>
-                                <th>Next Priority Steps</th>
-                                <th>Timeline</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>AI Can Do It</strong></td>
-                                <td>Going to prioritise doing other things</td>
-                                <td>Nil</td>
-                                <td>No timeline yet</td>
-                            </tr>
-                            <tr>
-                                <td><strong>ReADI</strong></td>
-                                <td>Time to prepare Data narrative and visualization for presentation is reduced dramatically</td>
-                                <td>I requested Gemini account access for my immediate team and we are using it after the Sprint. The solution works well for me. No immediate further problem or enhancement required at the moment</td>
-                                <td>No timeline yet</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="comparison-table">
-                    <div class="table-header">Support Needs & Barriers</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Team</th>
-                                <th>Support Needed</th>
-                                <th>Biggest Barriers</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>AI Can Do It</strong></td>
-                                <td>Technical mentorship</td>
-                                <td>Cannot produce output of sufficient quality</td>
-                            </tr>
-                            <tr>
-                                <td><strong>ReADI</strong></td>
-                                <td>Others: Continued access to Gemini Pro acct to enable continued usage</td>
-                                <td>Lack of awareness n user basic knowledge in prompt engineering</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- Future Plans & Development -->
+            <div class="comparison-table">
+                <div class="table-header">Future Plans & Development</div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>Future Vision</th>
+                        <th>Next Priority Steps</th>
+                        <th>Timeline</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><strong>AI Can Do It</strong></td>
+                        <td>Going to prioritise doing other things.</td>
+                        <td>Nil.</td>
+                        <td>No timeline yet.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ReADI</strong></td>
+                        <td>Reduce time to prepare data narrative and visualization for presentation.</td>
+                        <td>Requested Gemini access; using it after Sprint; works well; no immediate enhancements required.</td>
+                        <td>No timeline yet.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Minute Makers</strong></td>
+                        <td>Encourage adoption.</td>
+                        <td>Sharing of practice with team members.</td>
+                        <td>No timeline yet.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AI</strong></td>
+                        <td>Promote Transcribe tool improvements; increase awareness.</td>
+                        <td>Not applicable (solution under Transcribe team).</td>
+                        <td>No timeline yet.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SumUpFollowUp</strong></td>
+                        <td>Explore AI tools for meeting notes; Teams Copilot is straightforward for Teams calls.</td>
+                        <td>Teams Copilot ready to use; unsure how to provide feedback to Microsoft.</td>
+                        <td>No timeline yet.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OE Data Team 1</strong></td>
+                        <td>Adopt within team; runway limited if enterprise solutions land elsewhere.</td>
+                        <td>Ensure works with real data; find tool for dashboarding/quant analysis; adoption in progress.</td>
+                        <td>Next month / Next quarter (varies by response).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>T3 (Tender Tech Titans)</strong></td>
+                        <td>Add-on to fuller product in future; promote within PCD.</td>
+                        <td>No plan currently.</td>
+                        <td>No timeline yet.</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
 
-            <!-- Key Insights -->
-            <div class="section">
-                <h2 class="section-title">💡 Key Insights</h2>
-                <div class="insights-grid">
-                    <div class="insight-card">
-                        <div class="insight-title">🎯 Common Challenge</div>
-                        <div class="insight-text">Both teams struggled with resource constraints and balancing BAU work with sprint activities. This suggests future sprints need better workload planning.</div>
-                    </div>
-                    <div class="insight-card">
-                        <div class="insight-title">📈 Success Factors</div>
-                        <div class="insight-text">AI clinics support and prompt account setup were highly valued. Learning opportunities (video creation) also contributed to positive experiences.</div>
-                    </div>
-                    <div class="insight-card">
-                        <div class="insight-title">🔄 Continuation Patterns</div>
-                        <div class="insight-text">ReADI shows higher engagement with ongoing usage and some adoption beyond their team, while AI Can Do It has discontinued their solution.</div>
-                    </div>
-                    <div class="insight-card">
-                        <div class="insight-title">🛠️ Support Needs</div>
-                        <div class="insight-text">Different support needs identified: technical mentorship vs. continued platform access. Prompt engineering training appears to be a common need.</div>
-                    </div>
+            <!-- Support Needs & Barriers -->
+            <div class="comparison-table">
+                <div class="table-header">Support Needs & Barriers</div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>Support Needed</th>
+                        <th>Biggest Barriers</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><strong>AI Can Do It</strong></td>
+                        <td>Technical mentorship.</td>
+                        <td>Cannot produce output of sufficient quality.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ReADI</strong></td>
+                        <td>Continued access to Gemini Pro account.</td>
+                        <td>Lack of awareness and basic prompt engineering knowledge.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Minute Makers</strong></td>
+                        <td>Partnership connections.</td>
+                        <td>Quality of input data.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AI</strong></td>
+                        <td>Others: Not applicable.</td>
+                        <td>Reluctance or laziness to try new things.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SumUpFollowUp</strong></td>
+                        <td>Marketing/communications help; feedback channel to Microsoft.</td>
+                        <td>None really (Teams is default app).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OE Data Team 1</strong></td>
+                        <td>Technical mentorship; Access to data/tools; Funding guidance; Legal/compliance guidance (per one response).</td>
+                        <td>Tool availability/fit for data; stability/quality of AI outputs; competing internal solutions.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>T3 (Tender Tech Titans)</strong></td>
+                        <td>Marketing/communications help; DD support to promote usage.</td>
+                        <td>Mindset resistance; preference for “mega” solutions over incremental tools.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Key Insights -->
+        <div class="section">
+            <h2 class="section-title">💡 Key Insights</h2>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-title">🎯 Common Challenge</div>
+                    <div class="insight-text">Time pressure and BAU balancing persist across teams. Early license provisioning and clearer time commitment expectations would help.</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">📈 Success Enablers</div>
+                    <div class="insight-text">AI Clinics and clear instructions/resources consistently boosted progress and confidence.</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">🔄 Continuation Pattern</div>
+                    <div class="insight-text">Most teams plan to continue or are open to it, with adoption already at team or beyond-team level for the majority.</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">🛠️ Support Needs</div>
+                    <div class="insight-text">Top needs: technical mentorship, access to tools/data, comms/evangelism help; plus prompt-engineering upskilling.</div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </body>
 </html>
