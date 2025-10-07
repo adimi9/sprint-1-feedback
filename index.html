@@ -664,11 +664,13 @@ The solution works well for me. No immediate further problem or enhancement requ
         
           // 3) Compute "Team/Beyond Team Adoption" rate
           // We look for detail-row where label is "Continue Beyond Sprint:"
-          const continueRows = Array.from(document.querySelectorAll(".team-card .detail-row"))
+          const adoptionRows = Array.from(document.querySelectorAll(".team-card .detail-row"))
             .filter(row => {
               const label = row.querySelector(".detail-label");
-              return getText(label).toLowerCase().startsWith("adoption level");
+              return getText(label).toLowerCase().startsWith("continue beyond sprint");
             });
+        
+          const totalAdoption = adoptionRows.length; // denominator for percentage
         
           let beyondMeCount = 0;
         
@@ -682,8 +684,8 @@ The solution works well for me. No immediate further problem or enhancement requ
           });
         
           let beyondMeRate = null;
-          if (totalConsidered > 0) {
-            beyondMeRate = (beyondMeCount / totalConsidered) * 100;
+          if (totalAdoption > 0) {
+            beyondMeRate = (beyondMeCount / totalAdoption) * 100;
           }
         
           // 4) Update the top metric cards by their labels
