@@ -140,7 +140,7 @@
             </div>
             <div class="metric-card">
                 <div class="metric-value">100%</div>
-                <div class="metric-label">Continuation Rate (Yes/Maybe/Unsure)</div>
+                <div class="metric-label">Continuation Rate (Yes/Maybe)</div>
             </div>
             <div class="metric-card">
                 <div class="metric-value">91%</div>
@@ -686,7 +686,7 @@ The solution works well for me. No immediate further problem or enhancement requ
         
           // Update Continuation Rate (Yes/Maybe/Unsure) with % of "Yes"
           if (yesRatePct !== null) {
-            const contCard = findMetricByLabel("Continuation Rate (Yes/Maybe/Unsure)");
+            const contCard = findMetricByLabel("Continuation Rate (Yes/Maybe)");
             if (contCard) {
               const valueEl = contCard.querySelector(".metric-value");
               if (valueEl) {
