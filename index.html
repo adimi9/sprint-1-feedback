@@ -637,7 +637,7 @@ The solution works well for me. No immediate further problem or enhancement requ
             avgRating = sum / ratings.length;
           }
         
-          // 2) Compute "Yes" continuation rate
+          // 2) Compute "Yes" and "Maybe" continuation rate
           // We look for detail-row where label is "Continue Beyond Sprint:"
           const continueRows = Array.from(document.querySelectorAll(".team-card .detail-row"))
             .filter(row => {
@@ -662,7 +662,34 @@ The solution works well for me. No immediate further problem or enhancement requ
             yesRatePct = (yesCount / totalConsidered) * 100;
           }
         
-          // 3) Update the top metric cards by their labels
+<div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-team">My immediate team</span></div></div>
+
+          // 3) Compute "Team/Beyond Team Adoption" rate
+          // We look for detail-row where label is "Continue Beyond Sprint:"
+          const continueRows = Array.from(document.querySelectorAll(".team-card .detail-row"))
+            .filter(row => {
+              const label = row.querySelector(".detail-label");
+              return getText(label).toLowerCase().startsWith("adoption level");
+            });
+        
+          const totalConsidered = continueRows.length; // denominator for percentage
+          let beyondMeCount = 0;
+        
+          continueRows.forEach(row => {
+            const value = row.querySelector(".detail-value");
+            const text = getText(value).toLowerCase();
+            // Starts with "yes"
+            if (!text.startsWith("no") && !text.startsWith("i")) {
+              beyondMeCount += 1;
+            }
+          });
+        
+          let beyondMeRate = null;
+          if (totalConsidered > 0) {
+            beyondMeRate = (beyondMeCount / totalConsidered) * 100;
+          }
+        
+          // 4) Update the top metric cards by their labels
           const metricCards = Array.from(document.querySelectorAll(".metrics-grid .metric-card"));
           const findMetricByLabel = (labelText) => {
             const lowerTarget = labelText.toLowerCase();
@@ -692,6 +719,18 @@ The solution works well for me. No immediate further problem or enhancement requ
               if (valueEl) {
                 // Round to nearest whole number (or keep 0 decimals)
                 valueEl.textContent = `${Math.round(yesRatePct)}%`;
+              }
+            }
+          }
+
+           // Update Team/Beyond Team Adoption Rate with %
+          if (beyondMeRate !== null) {
+            const contCard = findMetricByLabel("Team/Beyond Team Adoption");
+            if (contCard) {
+              const valueEl = contCard.querySelector(".metric-value");
+              if (valueEl) {
+                // Round to nearest whole number (or keep 0 decimals)
+                valueEl.textContent = `${Math.round(beyondMeRate)}%`;
               }
             }
           }
