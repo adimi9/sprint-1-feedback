@@ -269,7 +269,7 @@
 
     const adoptionPos = rows.filter(r => {
       const a = txt(r[COLS.adoption]).toLowerCase();
-      if (!a || a.startsWith('no one')) return false;
+      if (!a || a.startsWith('no one') || a.startsWith("i'll") return false;
       return true;
     }).length;
     const adoptionRate = rows.length ? Math.round((adoptionPos / rows.length) * 100) : null;
