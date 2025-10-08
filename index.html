@@ -119,621 +119,325 @@
             th, td { padding: 10px; }
         }
     </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
 <div class="dashboard-container">
-    <div class="header">
-        <h1>🚀 SCG AI-First Sprint 1 Feedback Dashboard</h1>
-        <p>Comprehensive analysis of team experiences and outcomes</p>
+  <div class="header">
+    <h1>🚀 SCG AI-First Sprint 1 Feedback Dashboard</h1>
+    <p>Comprehensive analysis of team experiences and outcomes</p>
+  </div>
+
+  <div class="content">
+    <!-- Key Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value" id="avg-rating">-</div>
+        <div class="metric-label">Average Rating</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="total-responses">-</div>
+        <div class="metric-label">Total Responses</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="continuation-rate">-</div>
+        <div class="metric-label">Continuation Rate (Yes/Maybe)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="adoption-rate">-</div>
+        <div class="metric-label">Team/Beyond Team Adoption</div>
+      </div>
     </div>
 
-    <div class="content">
-        <!-- Key Metrics -->
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-value">4.0</div>
-                <div class="metric-label">Average Rating</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">11</div>
-                <div class="metric-label">Total Responses</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">100%</div>
-                <div class="metric-label">Continuation Rate (Yes/Maybe)</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">91%</div>
-                <div class="metric-label">Team/Beyond Team Adoption</div>
-            </div>
-        </div>
-
-        <!-- Team Overview Cards -->
-        <div class="section">
-            <h2 class="section-title">📊 Team Overview</h2>
-            <div class="team-comparison">
-                <!-- 1: AI Can Do It -->
-                <div class="team-card">
-                    <div class="team-header">
-                        <div class="team-name">AI Can Do It</div>
-                        <div class="rating-badge rating-3">3/5</div>
-                    </div>
-                    <div class="response-id">Response ID: 68d3ad7d1657665fe49832c7</div>
-                    <div class="team-details">
-                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Digital Governance</div></div>
-                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Wed, 24 Sep 2025 04:36 PM</div></div>
-                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-no">No one</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
-                    </div>
-                </div>
-
-                <!-- 2: ReADI (first) -->
-                <div class="team-card">
-                    <div class="team-header">
-                        <div class="team-name">ReADI (Real-time Analytics & Digital Intelligence)</div>
-                        <div class="rating-badge rating-4">4/5</div>
-                    </div>
-                    <div class="response-id">Response ID: 68cd4544178ee246e6181d32</div>
-                    <div class="team-details">
-                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Procurement</div></div>
-                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Fri, 19 Sep 2025 07:57 PM</div></div>
-                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe, depends on support/resources</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-some">Some people beyond my immediate team</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe</span></div></div>
-                    </div>
-                </div>
-
-                <!-- 3: Minute Makers -->
-                <div class="team-card">
-                    <div class="team-header">
-                        <div class="team-name">Minute Makers</div>
-                        <div class="rating-badge rating-4">4/5</div>
-                    </div>
-                    <div class="response-id">Response ID: 68e4c12243683b1a2889f8e9</div>
-                    <div class="team-details">
-                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Org Excellence</div></div>
-                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 03:28 PM</div></div>
-                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe, depends on support/resources</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-team">My immediate team</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
-                    </div>
-                </div>
-
-                <!-- 4: AI -->
-                <div class="team-card">
-                    <div class="team-header">
-                        <div class="team-name">AI</div>
-                        <div class="rating-badge rating-5">5/5</div>
-                    </div>
-                    <div class="response-id">Response ID: 68e4c1714e938aed62008005</div>
-                    <div class="team-details">
-                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Digital Governance</div></div>
-                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 03:29 PM</div></div>
-                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-some">Some people beyond my immediate team</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
-                    </div>
-                </div>
-
-                <!-- 5: SumUpFollowUp -->
-                <div class="team-card">
-                    <div class="team-header">
-                        <div class="team-name">SumUpFollowUp</div>
-                        <div class="rating-badge rating-4">4/5</div>
-                    </div>
-                    <div class="response-id">Response ID: 68e4c65413072300a6673fbf</div>
-                    <div class="team-details">
-                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Digital Governance</div></div>
-                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 03:50 PM</div></div>
-                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-some">Some people beyond my immediate team</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe</span></div></div>
-                    </div>
-                </div>
-
-                <!-- 6: OE Data Team 1 - #1 -->
-                <div class="team-card">
-                    <div class="team-header">
-                        <div class="team-name">OE Data Team 1 - Member 1</div>
-                        <div class="rating-badge rating-4">4/5</div>
-                    </div>
-                    <div class="response-id">Response ID: 68e4cac4b2cd35926f69aadd</div>
-                    <div class="team-details">
-                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Org Excellence</div></div>
-                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 04:09 PM</div></div>
-                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-yes">Yes, but unsure of timeline</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-yes">I'll definitely use it</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Timeline:</div><div class="detail-value">Next quarter</div></div>
-                        <div class="detail-row"><div class="detail-label">Support Needed:</div><div class="detail-value">Technical mentorship;Access to data or tools;Funding guidance</div></div>
-                    </div>
-                </div>
-
-                <!-- 7: OE Data Team 1 - #2 -->
-                <div class="team-card">
-                    <div class="team-header">
-                        <div class="team-name">OE Data Team 1 - Member 2</div>
-                        <div class="rating-badge rating-3">3/5</div>
-                    </div>
-                    <div class="response-id">Response ID: 68e4caff57fdd4599411d935</div>
-                    <div class="team-details">
-                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Org Excellence</div></div>
-                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 04:10 PM</div></div>
-                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-yes">Yes, but unsure of timeline</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-team">My immediate team</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Timeline:</div><div class="detail-value">Next month</div></div>
-                        <div class="detail-row"><div class="detail-label">Support Needed:</div><div class="detail-value">Technical mentorship</div></div>
-                    </div>
-                </div>
-
-                <!-- 8: OE Data Team 1 - #3 -->
-                <div class="team-card">
-                    <div class="team-header">
-                        <div class="team-name">OE Data Team 1 - Member 3</div>
-                        <div class="rating-badge rating-4">4/5</div>
-                    </div>
-                    <div class="response-id">Response ID: 68e4cbace51625a63fc27214</div>
-                    <div class="team-details">
-                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Org Excellence</div></div>
-                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 04:13 PM</div></div>
-                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-yes">Yes, definitely</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-team">My immediate team</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Timeline:</div><div class="detail-value">Next month</div></div>
-                        <div class="detail-row"><div class="detail-label">Support Needed:</div><div class="detail-value">Technical mentorship;Access to data or tools;Legal/compliance guidance</div></div>
-                    </div>
-                </div>
-
-                <!-- 9: T3 (Tender Tech Titans) -->
-                <div class="team-card">
-                    <div class="team-header">
-                        <div class="team-name">T3 (Tender Tech Titans)</div>
-                        <div class="rating-badge rating-3">3/5</div>
-                    </div>
-                    <div class="response-id">Response ID: 68e4d47643683b1a28906dee</div>
-                    <div class="team-details">
-                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Procurement</div></div>
-                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 04:51 PM</div></div>
-                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-unsure">Unsure</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-team">My immediate team</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-no">No</span></div></div>
-                    </div>
-                </div>
-
-                <!-- 10: ReADI (second) -->
-                <div class="team-card">
-                    <div class="team-header">
-                        <div class="team-name">ReADI (Real-time Analytics & Digital Intelligence)</div>
-                        <div class="rating-badge rating-5">5/5</div>
-                    </div>
-                    <div class="response-id">Response ID: 68e4d92c5fb256b3e20f3008</div>
-                    <div class="team-details">
-                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Procurement</div></div>
-                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 05:11 PM</div></div>
-                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-yes">Yes, but unsure of timeline</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-some">Some people beyond my immediate team</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-yes">Yes</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Timeline:</div><div class="detail-value">Next quarter</div></div>
-                        <div class="detail-row"><div class="detail-label">Support Needed:</div><div class="detail-value">Technical mentorship;Access to data or tools;User testing support</div></div>
-                    </div>
-                </div>
-
-                <!-- 11: ProphAI$y -->
-                <div class="team-card">
-                    <div class="team-header">
-                        <div class="team-name">ProphAI$y</div>
-                        <div class="rating-badge rating-5">5/5</div>
-                    </div>
-                    <div class="response-id">Response ID: 68e4da92854d12e7cdc86cc5</div>
-                    <div class="team-details">
-                        <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">Finance</div></div>
-                        <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">Tue, 07 Oct 2025 05:17 PM</div></div>
-                        <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge status-yes">Yes, definitely</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge status-yes">I'll definitely use it</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge status-maybe">Maybe</span></div></div>
-                        <div class="detail-row"><div class="detail-label">Timeline:</div><div class="detail-value">6+ months</div></div>
-                        <div class="detail-row"><div class="detail-label">Support Needed:</div><div class="detail-value">Others: not at this moment</div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Detailed Comparison Tables -->
-        <div class="section">
-            <h2 class="section-title">📋 Detailed Feedback Comparison</h2>
-
-            <!-- Sprint Experience & Challenges -->
-            <div class="comparison-table">
-                <div class="table-header">Sprint Experience & Challenges</div>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Team</th>
-                        <th>What Worked Best</th>
-                        <th>Biggest Challenge</th>
-                        <th>Suggestions for Improvement</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td><strong>AI Can Do It</strong></td>
-                        <td>Chance to learn new skills like video creation.</td>
-                        <td>Stress and overtime as cannot deprioritise work to do this sprint.</td>
-                        <td>Consider one that is not about trialling new AI solutions, but about going from POC to production and active usage, and delivering steady outcomes!  The participants can be (but need not be limited to) the POCs from earlier sprints :)  the cross-divisional aspect can be about the product finding new users</td>
-                    </tr>
-                    <tr>
-                        <td><strong>ReADI</strong></td>
-                        <td>1) Availability of AI clinics support to advise, bounce ideas on the suitable platforms for consideration. 
-2) prompt support to allow account creation to allow the team to start working on the problem statement.</td>
-                        <td>Resource constraint balancing BAU work, OKR delivery and working on Sprint solutions.</td>
-                        <td>Nil. Thanks again for organizing this.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Minute Makers</strong></td>
-                        <td>Good that the team provided clear instructions on what we needed to do, the timeline for submission. Good variety of resources and support.</td>
-                        <td>Short timeline</td>
-                        <td>Nil</td>
-                    </tr>
-                    <tr>
-                        <td><strong>AI</strong></td>
-                        <td>experimentation - backtrack when we made mistakes, review, make adjustments and try again.</td>
-                        <td>Making videos, we have zero experience making videos before this.</td>
-                        <td>Nope. It was a great and fun experience.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>SumUpFollowUp</strong></td>
-                        <td>Collaboration within the PSIRC team (facilitated by director Chun Kiam) to use a common narrative for the 3 entries that provides a common context.</td>
-                        <td>Lack of experience with video editing and voice narration generation apps.</td>
-                        <td>Perhaps provide a list of useful tools (like video editing and voice narration generation apps) for newcomers.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>OE Data Team 1 - Member 1</strong></td>
-                        <td>working with team together</td>
-                        <td>making the video</td>
-                        <td>give a bit more time; 
-consider make it a Fri. learning thing 1) a way to sustain learning week beyond one week 2) sustain AI expr beyond the 3 sprints, e.g. last fri of a month for teams to come together and do something on AI together, an AI Playground/party</td>
-                    </tr>
-                    <tr>
-                        <td><strong>OE Data Team 1 - Member 2</strong></td>
-                        <td>The AI Clinic</td>
-                        <td>Finding a good AI tool for quantitative analysis. Creating the video.</td>
-                        <td>Be clearer that this sprint will require some dedicated time resources, write to the ROs to ensure that they know this, publicise the sprint dates further in advance so that people can schedule their time better, do a sprint kick-off so that people know what resources are available and it feels like a more formal start, help people populate their sprint journey by giving them milestones and check in on their progress.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>OE Data Team 1 - Member 3</strong></td>
-                        <td>AI Clinics helped a lot. in terms of thinking through our solutions (what AI can or should not do) and also what other tech tools that we can consider</td>
-                        <td>1. lack of information on possible AI or workflow tools that is available to us or suitable for our use case
-2. doing the video</td>
-                        <td>share tips on how to upload videos to Slack. faced many hurdles to upload big media file to Slack</td>
-                    </tr>
-                    <tr>
-                        <td><strong>T3 (Tender Tech Titans)</strong></td>
-                        <td>Team members able to quickly narrow down the scope to deliver and work towards the goal in a coordinated manner</td>
-                        <td>Request for Co-pilot to explore feature, even with multiple clarifications, we never got the license by the deadline of submission, although we learnt that some DDs got their resources quite immediately. Uploading of video also a challenge which can only be done via mobile phone and not Comet.</td>
-                        <td>we felt that there's some differential treatment on request coming from DD level.
-Some very impressive winning products which is complex make us wonder how is it possible if from ideation to build only took 3 weeks, whether the judges had fairly assessed that these are not pre-existing product with work-in-progress before the Sprint.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>ReADI (second)</strong></td>
-                        <td>The AI clinics & workshops</td>
-                        <td>Tight time line</td>
-                        <td>Cater for more time for subsequent sprints</td>
-                    </tr>
-                    <tr>
-                        <td><strong>ProphAI$y</strong></td>
-                        <td>support for AI tooling</td>
-                        <td>insufficient time, trying to juggle tight deadlines at work + sprint at the same time</td>
-                        <td>-</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Future Plans & Development -->
-            <div class="comparison-table">
-                <div class="table-header">Future Plans & Development</div>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Team</th>
-                        <th>Future Vision</th>
-                        <th>Next Priority Steps</th>
-                        <th>Timeline</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td><strong>AI Can Do It</strong></td>
-                        <td>Going to prioritise doing other things.</td>
-                        <td>Nil.</td>
-                        <td>No timeline yet</td>
-                    </tr>
-                    <tr>
-                        <td><strong>ReADI</strong></td>
-                        <td>Time to prepare Data narrative and visualization for presentation is reduced dramatically.</td>
-                        <td>I requested Gemini account access for my immediate team and we are using it after the Sprint.
-The solution works well for me. No immediate further problem or enhancement required at the moment.</td>
-                        <td>No timeline yet</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Minute Makers</strong></td>
-                        <td>Encourage adoption</td>
-                        <td>Sharing of practice with my team members</td>
-                        <td>No timeline yet</td>
-                    </tr>
-                    <tr>
-                        <td><strong>AI</strong></td>
-                        <td>The solution is from the Transcribe team, we just want to tell people how wonderful the tool is and make more people aware that it has improved with new feature over time.</td>
-                        <td>Not applicable to us as the solution is under transcribe team.</td>
-                        <td>No timeline yet</td>
-                    </tr>
-                    <tr>
-                        <td><strong>SumUpFollowUp</strong></td>
-                        <td>Still exploring other AI tools for informal meeting notes generation, but so far, using Teams copilot is the most straightforward for Teams call notes.</td>
-                        <td>Teams copilot is ready to use. Not sure if there's a way for us to provide feedback to Microsoft for enhancement?</td>
-                        <td>No timeline yet</td>
-                    </tr>
-                    <tr>
-                        <td><strong>OE Data Team 1 - Member 1</strong></td>
-                        <td>take it to our team first</td>
-                        <td>make sure works with real data</td>
-                        <td>Next quarter</td>
-                    </tr>
-                    <tr>
-                        <td><strong>OE Data Team 1 - Member 2</strong></td>
-                        <td>-</td>
-                        <td>Finding a tool that can actually do dashboarding and proper quantitative analysis</td>
-                        <td>Next month</td>
-                    </tr>
-                    <tr>
-                        <td><strong>OE Data Team 1 - Member 3</strong></td>
-                        <td>I don't see much runway beyond my team especially if future solutions (e.g. AI Chaos) goes through that will allow for us to upload our files to where the AI and dashboarding capabilities reside.</td>
-                        <td>nothing much. my team is using it or in the process of adoption.</td>
-                        <td>Next month</td>
-                    </tr>
-                    <tr>
-                        <td><strong>T3 (Tender Tech Titans)</strong></td>
-                        <td>it could be add on to a more complete product in future and do more promoting among PCD</td>
-                        <td>no plan</td>
-                        <td>No timeline yet</td>
-                    </tr>
-                    <tr>
-                        <td><strong>ReADI (second)</strong></td>
-                        <td>Expand the user base to help boost efficiency</td>
-                        <td>Explore other potential application and gather feedback</td>
-                        <td>Next quarter</td>
-                    </tr>
-                    <tr>
-                        <td><strong>ProphAI$y</strong></td>
-                        <td>70% automation of budget exercise</td>
-                        <td>1. complete a model to a satisfactory level (right MLs used)
-2. comparisons against 1H 2025
-3. identify risks & tradeoffs, timeline</td>
-                        <td>6+ months</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Support Needs & Barriers -->
-            <div class="comparison-table">
-                <div class="table-header">Support Needs & Barriers</div>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Team</th>
-                        <th>Support Needed</th>
-                        <th>Biggest Barriers</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td><strong>AI Can Do It</strong></td>
-                        <td>Technical mentorship</td>
-                        <td>Cannot produce output of sufficient quality.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>ReADI</strong></td>
-                        <td>Others: Continued access to Gemini Pro acct to enable continued usage</td>
-                        <td>Lack of awareness n user basic knowledge in prompt engineering.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Minute Makers</strong></td>
-                        <td>Partnership connections</td>
-                        <td>Quality of input data</td>
-                    </tr>
-                    <tr>
-                        <td><strong>AI</strong></td>
-                        <td>Others: Not applicable.</td>
-                        <td>Reluctance or rather laziness to try out new things.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>SumUpFollowUp</strong></td>
-                        <td>Others: Not sure if there's a way for us to provide feedback to Microsoft for enhancement, and whether they'll take in our feedback?</td>
-                        <td>None really, since Teams is the default online meeting application.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>OE Data Team 1 - Member 1</strong></td>
-                        <td>Technical mentorship;Access to data or tools;Funding guidance</td>
-                        <td>what data can be used on what AI tool, and the stability of the quality of output from the AI tools</td>
-                    </tr>
-                    <tr>
-                        <td><strong>OE Data Team 1 - Member 2</strong></td>
-                        <td>Technical mentorship</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td><strong>OE Data Team 1 - Member 3</strong></td>
-                        <td>Technical mentorship;Access to data or tools;Legal/compliance guidance</td>
-                        <td>There are better and more comprehensive solutions coming out from later sprints</td>
-                    </tr>
-                    <tr>
-                        <td><strong>T3 (Tender Tech Titans)</strong></td>
-                        <td>Marketing/communications help;Others: the DDs support to promote usage within PCD</td>
-                        <td>resistance in mindset shift among co-workers in PCD, some would expect a mega super AI solution is more worth to implement as compare to small steps and minor tool.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>ReADI (second)</strong></td>
-                        <td>Technical mentorship;Access to data or tools;User testing support</td>
-                        <td>Resistance to explore and adopt new solution</td>
-                    </tr>
-                    <tr>
-                        <td><strong>ProphAI$y</strong></td>
-                        <td>Others: not at this moment</td>
-                        <td>interface, users' ability to understand the model methodology</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Key Insights -->
-        <div class="section">
-            <h2 class="section-title">💡 Key Insights</h2>
-            <div class="insights-grid">
-                <div class="insight-card">
-                    <div class="insight-title">⏱️ Time & Licensing Bottlenecks</div>
-                    <div class="insight-text">Short timelines and BAU load were the most common pain points. Early provisioning of licenses (e.g., Copilot, Gemini) and clearer time commitments to ROs would meaningfully reduce friction.</div>
-                </div>
-                <div class="insight-card">
-                    <div class="insight-title">🧪 Enablers: Clinics + Clear Instructions</div>
-                    <div class="insight-text">AI Clinics, workshops, and clear instructions/resources were repeatedly cited as what worked best — keep and scale these. Sharing tool lists (video editing, narration) would help newcomers ramp faster.</div>
-                </div>
-                <div class="insight-card">
-                    <div class="insight-title">🚀 Strong Continuation Intent</div>
-                    <div class="insight-text">100% of responses are either continuing, open to continue, or unsure — with adoption already at team/beyond-team level in 91% of cases. Focus support on maturing these trajectories.</div>
-                </div>
-                <div class="insight-card">
-                    <div class="insight-title">🎓 Upskilling Needs</div>
-                    <div class="insight-text">Prompt-engineering basics, data/tool access, and targeted technical mentorship are the top support asks. Consider a recurring “Fri learning” cadence and lightweight check-ins.</div>
-                </div>
-                <div class="insight-card">
-                    <div class="insight-title">📣 Evangelism & Feedback Loops</div>
-                    <div class="insight-text">Some teams need marketing/comms and leadership advocacy to drive adoption. Where external tools are involved (e.g., Microsoft), a feedback channel would help teams close the loop.</div>
-                </div>
-            </div>
-        </div>
+    <!-- Team Overview Cards -->
+    <div class="section">
+      <h2 class="section-title">📊 Team Overview</h2>
+      <div class="team-comparison" id="team-cards">
+        <!-- Rendered dynamically -->
+      </div>
     </div>
+
+    <!-- Detailed Comparison Tables -->
+    <div class="section">
+      <h2 class="section-title">📋 Detailed Feedback Comparison</h2>
+
+      <!-- Sprint Experience & Challenges -->
+      <div class="comparison-table">
+        <div class="table-header">Sprint Experience & Challenges</div>
+        <table>
+          <thead>
+          <tr>
+            <th>Team</th>
+            <th>What Worked Best</th>
+            <th>Biggest Challenge</th>
+            <th>Suggestions for Improvement</th>
+          </tr>
+          </thead>
+          <tbody id="table-experience">
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Future Plans & Development -->
+      <div class="comparison-table">
+        <div class="table-header">Future Plans & Development</div>
+        <table>
+          <thead>
+          <tr>
+            <th>Team</th>
+            <th>Future Vision</th>
+            <th>Next Priority Steps</th>
+            <th>Timeline</th>
+          </tr>
+          </thead>
+          <tbody id="table-future">
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Support Needs & Barriers -->
+      <div class="comparison-table">
+        <div class="table-header">Support Needs & Barriers</div>
+        <table>
+          <thead>
+          <tr>
+            <th>Team</th>
+            <th>Support Needed</th>
+            <th>Biggest Barriers</th>
+          </tr>
+          </thead>
+          <tbody id="table-support">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Key Insights -->
+    <div class="section">
+      <h2 class="section-title">💡 Key Insights</h2>
+      <div class="insights-grid" id="insights">
+        <!-- Keep your static insights or generate dynamically if you prefer -->
+        <div class="insight-card">
+          <div class="insight-title">⏱️ Time & Licensing Bottlenecks</div>
+          <div class="insight-text">Short timelines and BAU load were the most common pain points. Early provisioning of licenses (e.g., Copilot, Gemini) and clearer time commitments to ROs would meaningfully reduce friction.</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-title">🧪 Enablers: Clinics + Clear Instructions</div>
+          <div class="insight-text">AI Clinics, workshops, and clear instructions/resources were repeatedly cited as what worked best — keep and scale these. Sharing tool lists (video editing, narration) would help newcomers ramp faster.</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-title">🚀 Strong Continuation Intent</div>
+          <div class="insight-text">High continuation intent; focus support on maturing these trajectories.</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-title">🎓 Upskilling Needs</div>
+          <div class="insight-text">Prompt-engineering basics, data/tool access, and targeted technical mentorship are common asks. Consider a recurring “Fri learning” cadence and lightweight check-ins.</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-title">📣 Evangelism & Feedback Loops</div>
+          <div class="insight-text">Some teams need marketing/comms and leadership advocacy to drive adoption. Where external tools are involved (e.g., Microsoft), a feedback channel would help teams close the loop.</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-</body>
-       <script>
-        (function () {
-          // Helper: safely get text content
-          const getText = (el) => (el ? el.textContent.trim() : "");
-      
-          // 1) Collect ratings from all team cards
-          const ratingBadges = Array.from(document.querySelectorAll(".team-card .rating-badge"));
-          const ratings = ratingBadges.map(badge => {
-            const m = getText(badge).match(/(\d+(?:\.\d+)?)\s*\/\s*5/);
-            return m ? parseFloat(m[1]) : null;
-          }).filter(n => typeof n === "number" && !Number.isNaN(n));
-      
-          // Compute average rating (out of 5)
-          let avgRating = null;
-          if (ratings.length > 0) {
-            const sum = ratings.reduce((a, b) => a + b, 0);
-            avgRating = sum / ratings.length;
-          }
-      
-          // 2) Compute "Yes" and "Maybe" continuation rate
-          // We look for detail-row where label is "Continue Beyond Sprint:"
-          const continueRows = Array.from(document.querySelectorAll(".team-card .detail-row"))
-            .filter(row => {
-              const label = row.querySelector(".detail-label");
-              return getText(label).toLowerCase().startsWith("continue beyond sprint");
-            });
-      
-          const totalConsidered = continueRows.length; // denominator for percentage
-          let yesCount = 0;
-      
-          continueRows.forEach(row => {
-            const value = row.querySelector(".detail-value");
-            const text = getText(value).toLowerCase();
-            // Starts with "yes"
-            if (text.startsWith("yes") || text.startsWith("maybe")) {
-              yesCount += 1;
-            }
-          });
-      
-          let yesRatePct = null;
-          if (totalConsidered > 0) {
-            yesRatePct = (yesCount / totalConsidered) * 100;
-          }
-      
-          // 3) Compute "Team/Beyond Team Adoption" rate
-          // We look for detail-row where label is "Continue Beyond Sprint:"
-          const adoptionRows = Array.from(document.querySelectorAll(".team-card .detail-row"))
-            .filter(row => {
-              const label = row.querySelector(".detail-label");
-              return getText(label).toLowerCase().startsWith("continue beyond sprint");
-            });
-      
-          const totalAdoption = adoptionRows.length; // denominator for percentage
-      
-          let beyondMeCount = 0;
-      
-          continueRows.forEach(row => {
-            const value = row.querySelector(".detail-value");
-            const text = getText(value).toLowerCase();
-            // Starts with "yes"
-            if (!text.startsWith("no") && !text.startsWith("i'll")) {
-              beyondMeCount += 1;
-            }
-          });
-      
-          let beyondMeRate = null;
-          if (totalAdoption > 0) {
-            beyondMeRate = (beyondMeCount / totalAdoption) * 100;
-          }
-      
-          // 4) Update the top metric cards by their labels
-          const metricCards = Array.from(document.querySelectorAll(".metrics-grid .metric-card"));
-          const findMetricByLabel = (labelText) => {
-            const lowerTarget = labelText.toLowerCase();
-            return metricCards.find(card => {
-              const labelEl = card.querySelector(".metric-label");
-              return labelEl && getText(labelEl).toLowerCase() === lowerTarget;
-            });
-          };
-      
-          // Update Average Rating
-          if (avgRating !== null) {
-            const avgCard = findMetricByLabel("Average Rating");
-            if (avgCard) {
-              const valueEl = avgCard.querySelector(".metric-value");
-              if (valueEl) {
-                // Round to one decimal place
-                valueEl.textContent = (Math.round(avgRating * 10) / 10).toFixed(1);
-              }
-            }
-          }
-      
-          // Update Continuation Rate (Yes/Maybe/Unsure) with % of "Yes"
-          if (yesRatePct !== null) {
-            const contCard = findMetricByLabel("Continuation Rate (Yes/Maybe)");
-            if (contCard) {
-              const valueEl = contCard.querySelector(".metric-value");
-              if (valueEl) {
-                // Round to nearest whole number (or keep 0 decimals)
-                valueEl.textContent = `${Math.round(yesRatePct)}%`;
-              }
-            }
-          }
 
-           // Update Team/Beyond Team Adoption Rate with %
-          if (beyondMeRate !== null) {
-            const contCard = findMetricByLabel("Team/Beyond Team Adoption");
-            if (contCard) {
-              const valueEl = contCard.querySelector(".metric-value");
-              if (valueEl) {
-                // Round to nearest whole number (or keep 0 decimals)
-                valueEl.textContent = `${Math.round(beyondMeRate)}%`;
-              }
-            }
-          }
-      
-        })();
-    </script>
+<script>
+(function () {
+  // 1) Configure your CSV source
+  // If running locally, consider a simple static server (e.g., `python -m http.server`) to avoid CORS issues.
+  const CSV_URL = 'Sprint 1 Feedback Form-68b904bdfedea2208c5b26ab.csv'; // or a full URL if hosted
+
+  // 2) Column name mapping (exactly as in your CSV header)
+  const COLS = {
+    id: 'Response ID',
+    ts: 'Timestamp',
+    team: 'Which Sprint team are you from?',
+    division: 'Which division are you from?',
+    rating: 'On a scale of 1-5, how would you rate your SCG AI-First Sprint Experience?',
+    worked: 'What worked best during the sprint process?',
+    challenge: 'What was the biggest challenge your team faced?',
+    better: 'Anything you would like us to do better for upcoming Sprints?',
+    adoption: 'How is the adoption of your solution?',
+    vision: 'Where do you envision taking your solution next?',
+    continue: 'Do you plan to continue working on this solution beyond the sprint?',
+    steps: 'What are your next 2-3 priority steps for development?',
+    timeline: 'What is your realistic timeline for moving forward?',
+    support: 'What type of support would be most valuable for advancing your solution? (Check all that apply)',
+    barriers: 'What are the biggest barriers you foresee in scaling or adopting your solution?',
+    followup: 'Would you be interested in ongoing check-ins or follow-up sessions?'
+  };
+
+  // 3) Utilities
+  const el = (html) => {
+    const t = document.createElement('template');
+    t.innerHTML = html.trim();
+    return t.content.firstChild;
+  };
+  const txt = (v) => (v == null ? '' : String(v).trim());
+  const parseRating = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const classifyRatingBadge = (r) => {
+    if (r >= 5) return 'rating-5';
+    if (r >= 4) return 'rating-4';
+    if (r >= 3) return 'rating-3';
+    return 'rating-3';
+  };
+  const statusBadge = (value, mapping) => {
+    const t = txt(value).toLowerCase();
+    for (const [key, cls] of mapping) {
+      if (t.startsWith(key)) return cls;
+    }
+    return 'status-unsure';
+  };
+
+  // 4) Main render
+  function render(dataRows) {
+    // Filter out blank/meta rows (some CSV exports include top meta lines)
+    // Heuristic: keep rows that have a Response ID and a non-empty Team
+    const rows = dataRows.filter(r => txt(r[COLS.id]) && txt(r[COLS.team]));
+
+    // Compute metrics
+    const ratings = rows.map(r => parseRating(r[COLS.rating])).filter(n => n != null);
+    const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : null;
+
+    // Continuation: count Yes or Maybe
+    const contYesMaybe = rows.filter(r => {
+      const c = txt(r[COLS.continue]).toLowerCase();
+      return c.startsWith('yes') || c.startsWith('maybe');
+    }).length;
+    const contRate = rows.length ? Math.round((contYesMaybe / rows.length) * 100) : null;
+
+    // Adoption: count any that indicate team/beyond-team (exclude "no one" and blanks)
+    const adoptionPos = rows.filter(r => {
+      const a = txt(r[COLS.adoption]).toLowerCase();
+      if (!a) return false;
+      if (a.startsWith('no one')) return false;
+      return true; // counts "my immediate team", "i'll definitely use it", "some people beyond my immediate team", etc.
+    }).length;
+    const adoptionRate = rows.length ? Math.round((adoptionPos / rows.length) * 100) : null;
+
+    // Update metric cards
+    document.getElementById('avg-rating').textContent = avg != null ? (Math.round(avg*10)/10).toFixed(1) : '-';
+    document.getElementById('total-responses').textContent = rows.length;
+    document.getElementById('continuation-rate').textContent = contRate != null ? `${contRate}%` : '-';
+    document.getElementById('adoption-rate').textContent = adoptionRate != null ? `${adoptionRate}%` : '-';
+
+    // Team cards
+    const teamCards = document.getElementById('team-cards');
+    teamCards.innerHTML = '';
+    rows.forEach(r => {
+      const team = txt(r[COLS.team]);
+      const division = txt(r[COLS.division]);
+      const ts = txt(r[COLS.ts]);
+      const rating = parseRating(r[COLS.rating]) ?? '-';
+      const cont = txt(r[COLS.continue]);
+      const adoption = txt(r[COLS.adoption]);
+      const follow = txt(r[COLS.followup]);
+      const timeline = txt(r[COLS.timeline]);
+      const support = txt(r[COLS.support]);
+
+      const contClass = statusBadge(cont, [
+        ['yes, definitely', 'status-yes'],
+        ['yes, but', 'status-yes'],
+        ['maybe', 'status-maybe'],
+        ['unsure', 'status-unsure'],
+        ['no', 'status-no'],
+      ]);
+      const adoptClass = statusBadge(adoption, [
+        ["i'll definitely use it", 'status-yes'],
+        ['some people', 'status-some'],
+        ['my immediate team', 'status-team'],
+        ['no one', 'status-no'],
+      ]);
+      const followClass = statusBadge(follow, [
+        ['yes', 'status-yes'],
+        ['maybe', 'status-maybe'],
+        ['no', 'status-no'],
+      ]);
+
+      const ratingClass = classifyRatingBadge(rating);
+
+      const card = el(`
+        <div class="team-card">
+          <div class="team-header">
+            <div class="team-name">${team || '-'}</div>
+            <div class="rating-badge ${ratingClass}">${rating}/5</div>
+          </div>
+          <div class="response-id">Response ID: ${txt(r[COLS.id])}</div>
+          <div class="team-details">
+            <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">${division || '-'}</div></div>
+            <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">${ts || '-'}</div></div>
+            <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge ${contClass}">${cont || '-'}</span></div></div>
+            <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge ${adoptClass}">${adoption || '-'}</span></div></div>
+            <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge ${followClass}">${follow || '-'}</span></div></div>
+            ${timeline ? `<div class="detail-row"><div class="detail-label">Timeline:</div><div class="detail-value">${timeline}</div></div>` : ''}
+            ${support ? `<div class="detail-row"><div class="detail-label">Support Needed:</div><div class="detail-value">${support}</div></div>` : ''}
+          </div>
+        </div>
+      `);
+      teamCards.appendChild(card);
+    });
+
+    // Tables
+    const tbodyExp = document.getElementById('table-experience');
+    const tbodyFuture = document.getElementById('table-future');
+    const tbodySupport = document.getElementById('table-support');
+
+    tbodyExp.innerHTML = rows.map(r => `
+      <tr>
+        <td><strong>${txt(r[COLS.team])}</strong></td>
+        <td>${txt(r[COLS.worked]).replaceAll('\n','<br/>')}</td>
+        <td>${txt(r[COLS.challenge]).replaceAll('\n','<br/>')}</td>
+        <td>${txt(r[COLS.better]).replaceAll('\n','<br/>')}</td>
+      </tr>
+    `).join('');
+
+    tbodyFuture.innerHTML = rows.map(r => `
+      <tr>
+        <td><strong>${txt(r[COLS.team])}</strong></td>
+        <td>${txt(r[COLS.vision]).replaceAll('\n','<br/>')}</td>
+        <td>${txt(r[COLS.steps]).replaceAll('\n','<br/>')}</td>
+        <td>${txt(r[COLS.timeline])}</td>
+      </tr>
+    `).join('');
+
+    tbodySupport.innerHTML = rows.map(r => `
+      <tr>
+        <td><strong>${txt(r[COLS.team])}</strong></td>
+        <td>${txt(r[COLS.support])}</td>
+        <td>${txt(r[COLS.barriers])}</td>
+      </tr>
+    `).join('');
+  }
+
+  // 5) Load CSV via Papa Parse
+  Papa.parse(CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: (results) => {
+      // Some exports include meta rows above the real header — if so,
+      // verify we have expected columns; if not, try to detect the real header row.
+      const rows = results.data;
+
+      // If you notice top meta rows (e.g., "Expected total responses"), auto-trim:
+      const hasTeamKey = rows.length && (('Which Sprint team are you from?' in rows[0]) || ('Which Sprint team are you from?' in rows.find(()=>true) || false));
+      if (!hasTeamKey) {
+        // Soft-fail: still render whatever we can
+        console.warn('CSV headers not matched. Verify header row in CSV.');
+      }
+
+      render(rows);
+    },
+    error: (err) => {
+      console.error('CSV parse error:', err);
+      alert('Failed to load CSV. Check the file path or server settings.');
+    }
+  });
+})();
+</script>
+</body>
 </html>
