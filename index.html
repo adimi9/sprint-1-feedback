@@ -343,15 +343,17 @@
       const teamTotal = TEAM_HEADCOUNT.get(teamName);
       const responded = `${teamRows.length}${teamTotal ? ` / ${teamTotal}` : ''}`;
 
-      // Build pill groups per row with member index (NO DOTS for cards)
-      function buildMemberPillsCard(key, pillClassFn, valueTransform = (v)=>v) {
+      // Build pill groups per row with member index + color
+      function buildMemberPills(key, pillClassFn, valueTransform = (v)=>v) {
         return teamRows.map((r, idx) => {
           const val = txt(r[key]);
           if (!val) return '';
           const display = valueTransform(val);
+          const color = memberColor(idx);
           const rid = txt(r[COLS.id]);
           return `
-            <span class="mchip-card pill ${pillClassFn(val)}" title="ID: ${rid}">
+            <span class="mchip pill ${pillClassFn(val)}" title="ID: ${rid}">
+              <span class="dot" style="background:${color};"></span>
               <span>#${idx+1}</span>
               <span>${display}</span>
             </span>
@@ -359,22 +361,50 @@
         }).filter(Boolean).join('');
       }
 
-      // Rating pills (no dots)
+      // Timestamp pills (formatted)
+      function fmtTs(s) {
+        const raw = txt(s);
+        if (!raw) return '';
+        // keep your provided format; if parseable, render weekday prefix
+        try {
+          const d = new Date(raw.replace(' AM',' AM').replace(' PM',' PM'));
+          if (!isNaN(d.getTime())) {
+            return d.toLocaleString('en-SG', { weekday:'short', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true });
+          }
+        } catch {}
+        return raw; // fallback
+      }
+
+      const tsPills = teamRows.map((r, idx) => {
+        const color = memberColor(idx);
+        const rid = txt(r[COLS.id]);
+        return `
+          <span class="mchip pill pill-soft" title="ID: ${rid}">
+            <span class="dot" style="background:${color};"></span>
+            <span>#${idx+1}</span>
+            <span>${fmtTs(r[COLS.ts])}</span>
+          </span>
+        `;
+      }).join('');
+
+      // Rating pills
       const ratingPills = teamRows.map((r, idx) => {
         const n = parseRating(r[COLS.rating]);
         if (n == null) return '';
+        const color = memberColor(idx);
         const rid = txt(r[COLS.id]);
         return `
-          <span class="mchip-card pill ${pillClassForRating(n)}" title="ID: ${rid}">
+          <span class="mchip pill ${pillClassForRating(n)}" title="ID: ${rid}">
+            <span class="dot" style="background:${color};"></span>
             <span>#${idx+1}</span>
             <span>${n.toFixed(1)}</span>
           </span>
         `;
       }).join('');
 
-      const continuePills = buildMemberPillsCard(COLS.continue, pillClassForContinue);
-      const adoptionPills = buildMemberPillsCard(COLS.adoption, pillClassForAdoption);
-      const followupPills = buildMemberPillsCard(COLS.followup, pillClassForFollowup);
+      const continuePills = buildMemberPills(COLS.continue, pillClassForContinue);
+      const adoptionPills = buildMemberPills(COLS.adoption, pillClassForAdoption);
+      const followupPills = buildMemberPills(COLS.followup, pillClassForFollowup);
 
       const division = txt(teamRows[0][COLS.division]) || '—';
 
@@ -412,7 +442,7 @@
       teamCards.appendChild(card);
     });
 
-    // Tables (WITH DOTS - using .mchip class)
+    // Tables (reuse compact grouped answers for richer context)
     const tbodyExp = document.getElementById('table-experience');
     const tbodyFuture = document.getElementById('table-future');
     const tbodySupport = document.getElementById('table-support');
@@ -484,7 +514,7 @@
       <tr>
         <td>
           <strong>${team}</strong><br/>
-          <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${teamTotal}` : ''}</span><br/>
+          <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
           <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
         </td>
         <td>${renderAnswerCell(teamRows, COLS.support)}</td>
