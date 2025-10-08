@@ -251,24 +251,14 @@
   };
   const uniqNonEmpty = (arr) => [...new Set(arr.map(x => txt(x)).filter(Boolean))];
 
-  // Simple hash to color-code unique responses consistently within a cell
-  function hashStr(s) {
-    let h = 0;
-    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-    return Math.abs(h);
-  }
-  function chipColorFor(value) {
-    // pastel palette rotated by hash
-    const colors = [
-      '#E3F2FD', '#E8F5E9', '#FFF3E0', '#F3E5F5', '#E0F7FA',
-      '#FCE4EC', '#FFF8E1', '#EDE7F6', '#E0F2F1', '#F1F8E9'
-    ];
-    const idx = hashStr(value) % colors.length;
-    return colors[idx];
-  }
-  function makeChips(values) {
-    return values.map(v => `<span style="display:inline-block; background:${chipColorFor(v)}; color:#2d3748; padding:4px 8px; border-radius:12px; margin:2px; font-size:0.9rem;">${v}</span>`).join('');
-  }
+  // Member color palette (loop if more members)
+  const MEMBER_COLORS = [
+    '#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9',
+    '#BBDEFB', '#B3E5FC', '#B2EBF2', '#B2DFDB', '#C8E6C9',
+    '#DCEDC8', '#F0F4C3', '#FFF9C4', '#FFECB3', '#FFE0B2',
+    '#FFCCBC', '#D7CCC8', '#CFD8DC'
+  ];
+  const MEMBER_TEXT = '#1f2937';
 
   function groupByTeam(rows) {
     const map = new Map();
@@ -277,6 +267,16 @@
       if (!map.has(team)) map.set(team, []);
       map.get(team).push(r);
     }
+    return map;
+  }
+
+  // Build a stable member color map per team based on Response ID (fallback to index)
+  function buildMemberColorMap(teamRows) {
+    const map = new Map();
+    teamRows.forEach((r, idx) => {
+      const key = txt(r[COLS.id]) || `idx-${idx}`;
+      map.set(key, MEMBER_COLORS[idx % MEMBER_COLORS.length]);
+    });
     return map;
   }
 
@@ -308,28 +308,30 @@
       else adoptCounts.unsure++;
     });
 
-    const aggList = (key, maxItems = 100) => {
-      const vals = uniqNonEmpty(teamRows.flatMap(r => (txt(r[key]) || '').split('\n')));
-      return vals.slice(0, maxItems);
-    };
+    return { avgRating: avg, ratingDist, size: teamRows.length, contCounts, adoptCounts };
+  }
 
-    return {
-      avgRating: avg,
-      ratingDist,
-      size: teamRows.length,
-      contCounts,
-      adoptCounts,
-      agg: {
-        worked: aggList(COLS.worked),
-        challenge: aggList(COLS.challenge),
-        better: aggList(COLS.better),
-        vision: aggList(COLS.vision),
-        steps: aggList(COLS.steps),
-        timeline: uniqNonEmpty(teamRows.map(r => r[COLS.timeline])),
-        support: aggList(COLS.support),
-        barriers: aggList(COLS.barriers)
-      }
-    };
+  // For table cells: group identical answers and attach colored member chips of contributors
+  function groupAnswersWithMembers(teamRows, key) {
+    // Build list of {answer, memberKey, memberIndex}
+    const items = [];
+    teamRows.forEach((r, idx) => {
+      const memberKey = txt(r[COLS.id]) || `idx-${idx}`;
+      const raw = txt(r[key]);
+      if (!raw) return;
+      // Split on newlines (multiple bullets in text)
+      const parts = raw.split('\n').map(s => txt(s)).filter(Boolean);
+      if (parts.length === 0) return;
+      parts.forEach(p => items.push({ answer: p, memberKey, memberIndex: idx }));
+    });
+
+    // Group by identical answer text
+    const map = new Map();
+    for (const it of items) {
+      if (!map.has(it.answer)) map.set(it.answer, []);
+      map.get(it.answer).push({ memberKey: it.memberKey, memberIndex: it.memberIndex });
+    }
+    return map; // Map<answer, [{memberKey, memberIndex}]>
   }
 
   function render(rows) {
@@ -346,7 +348,7 @@
 
     const adoptionPos = rows.filter(r => {
       const a = txt(r[COLS.adoption]).toLowerCase();
-      if (!a || a.startsWith('no one') || a.startsWith("i'll")) return false; // your original heuristic
+      if (!a || a.startsWith('no one') || a.startsWith("i'll")) return false;
       return true;
     }).length;
     const adoptionRate = rows.length ? Math.round((adoptionPos / rows.length) * 100) : null;
@@ -363,6 +365,7 @@
 
     // Render one card per team
     [...byTeam.entries()].sort((a,b) => a[0].localeCompare(b[0])).forEach(([teamName, teamRows]) => {
+      const memberColorMap = buildMemberColorMap(teamRows);
       const s = summarizeTeam(teamRows);
       const ratingClass = classifyRatingBadge(s.avgRating ?? 3);
 
@@ -395,15 +398,16 @@
         s.adoptCounts.none >= 1 ? `<span class="status-badge status-no">No one: ${s.adoptCounts.none}</span>` : ''
       ].filter(Boolean).join(' ');
 
-      // Member-level collapsible list
+      // Member-level collapsible list (kept concise)
       const membersHtml = teamRows.map((r, idx) => {
         const rid = txt(r[COLS.id]);
         const rating = parseRating(r[COLS.rating]) ?? '-';
         const cont = txt(r[COLS.continue]) || '-';
         const worked = txt(r[COLS.worked]);
         const challenge = txt(r[COLS.challenge]);
+        const color = memberColorMap.get(rid) || MEMBER_COLORS[idx % MEMBER_COLORS.length];
         return `
-          <details style="background:#f8fafc; border-radius:10px; padding:10px 12px;">
+          <details style="background:#f8fafc; border-radius:10px; padding:10px 12px; border-left:6px solid ${color};">
             <summary style="cursor:pointer; display:flex; gap:10px; align-items:center;">
               <span style="font-weight:600; color:#2d3748;">Member ${idx+1}</span>
               <span class="status-badge ${classifyRatingBadge(rating)}">${rating}/5</span>
@@ -455,57 +459,78 @@
       teamCards.appendChild(card);
     });
 
-    // Aggregated tables: one row per team, with color-coded chips for distinct responses
+    // Aggregated tables with per-member colors
     const tbodyExp = document.getElementById('table-experience');
     const tbodyFuture = document.getElementById('table-future');
     const tbodySupport = document.getElementById('table-support');
 
-    const teamSummaries = [...byTeam.entries()]
-      .map(([team, teamRows]) => ({ team, rows: teamRows, summary: summarizeTeam(teamRows) }))
-      .sort((a,b) => a.team.localeCompare(b.team));
+    const teamEntries = [...byTeam.entries()].sort((a,b) => a[0].localeCompare(b[0]));
 
-    const respondentChips = (rows) => {
-      // Show small neutral chips for each respondent to reflect n and enable quick count
-      return rows.map((r, i) => `<span class="status-badge status-unsure" title="ID ${txt(r[COLS.id])}" style="background:#edf2f7; color:#4a5568; margin:2px;">#${i+1}</span>`).join('');
-    };
+    function renderAnswerCell(teamRows, key) {
+      const memberColorMap = buildMemberColorMap(teamRows);
+      const grouped = groupAnswersWithMembers(teamRows, key);
 
-    const chipsForList = (arr) => makeChips(arr);
+      // Build blocks per unique answer with member chips colored by member
+      const blocks = [...grouped.entries()].map(([answer, members]) => {
+        const chips = members.map(({memberKey, memberIndex}) => {
+          const color = memberColorMap.get(memberKey) || MEMBER_COLORS[memberIndex % MEMBER_COLORS.length];
+          return `<span title="${memberKey}" style="display:inline-block; background:${color}; color:${MEMBER_TEXT}; padding:3px 8px; border-radius:10px; margin:2px; font-size:0.85rem;">#${memberIndex+1}</span>`;
+        }).join('');
+        return `
+          <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:8px 10px; margin:6px 0;">
+            <div style="color:#111827; margin-bottom:6px;">${answer}</div>
+            <div>${chips}</div>
+          </div>
+        `;
+      });
 
-    tbodyExp.innerHTML = teamSummaries.map(({team, rows, summary}) => `
+      return blocks.join('');
+    }
+
+    function respondentLegend(teamRows) {
+      const memberColorMap = buildMemberColorMap(teamRows);
+      return teamRows.map((r, idx) => {
+        const key = txt(r[COLS.id]) || `idx-${idx}`;
+        const color = memberColorMap.get(key) || MEMBER_COLORS[idx % MEMBER_COLORS.length];
+        return `<span title="ID ${key}" style="display:inline-block; background:${color}; color:${MEMBER_TEXT}; padding:4px 8px; border-radius:12px; margin:2px; font-size:0.85rem;">#${idx+1}</span>`;
+      }).join('');
+    }
+
+    tbodyExp.innerHTML = teamEntries.map(([team, teamRows]) => `
       <tr>
         <td>
           <strong>${team}</strong><br/>
-          <span style="color:#718096; font-size:0.85rem;">respondents: ${rows.length}</span><br/>
-          <div style="margin-top:4px;">${respondentChips(rows)}</div>
+          <span style="color:#718096; font-size:0.85rem;">respondents: ${teamRows.length}</span><br/>
+          <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
         </td>
-        <td>${chipsForList(summary.agg.worked)}</td>
-        <td>${chipsForList(summary.agg.challenge)}</td>
-        <td>${chipsForList(summary.agg.better)}</td>
+        <td>${renderAnswerCell(teamRows, COLS.worked)}</td>
+        <td>${renderAnswerCell(teamRows, COLS.challenge)}</td>
+        <td>${renderAnswerCell(teamRows, COLS.better)}</td>
       </tr>
     `).join('');
 
-    tbodyFuture.innerHTML = teamSummaries.map(({team, rows, summary}) => `
+    tbodyFuture.innerHTML = teamEntries.map(([team, teamRows]) => `
       <tr>
         <td>
           <strong>${team}</strong><br/>
-          <span style="color:#718096; font-size:0.85rem;">respondents: ${rows.length}</span><br/>
-          <div style="margin-top:4px;">${respondentChips(rows)}</div>
+          <span style="color:#718096; font-size:0.85rem;">respondents: ${teamRows.length}</span><br/>
+          <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
         </td>
-        <td>${chipsForList(summary.agg.vision)}</td>
-        <td>${chipsForList(summary.agg.steps)}</td>
-        <td>${chipsForList(summary.agg.timeline)}</td>
+        <td>${renderAnswerCell(teamRows, COLS.vision)}</td>
+        <td>${renderAnswerCell(teamRows, COLS.steps)}</td>
+        <td>${renderAnswerCell(teamRows, COLS.timeline)}</td>
       </tr>
     `).join('');
 
-    tbodySupport.innerHTML = teamSummaries.map(({team, rows, summary}) => `
+    tbodySupport.innerHTML = teamEntries.map(([team, teamRows]) => `
       <tr>
         <td>
           <strong>${team}</strong><br/>
-          <span style="color:#718096; font-size:0.85rem;">respondents: ${rows.length}</span><br/>
-          <div style="margin-top:4px;">${respondentChips(rows)}</div>
+          <span style="color:#718096; font-size:0.85rem;">respondents: ${teamRows.length}</span><br/>
+          <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
         </td>
-        <td>${chipsForList(summary.agg.support)}</td>
-        <td>${chipsForList(summary.agg.barriers)}</td>
+        <td>${renderAnswerCell(teamRows, COLS.support)}</td>
+        <td>${renderAnswerCell(teamRows, COLS.barriers)}</td>
       </tr>
     `).join('');
   }
