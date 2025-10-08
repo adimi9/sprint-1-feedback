@@ -48,6 +48,47 @@
     .metric-value { font-size: 2rem; font-weight: 800; color: #1f2937; }
     .metric-label { font-size: 0.95rem; color: #4b5563; font-weight: 600; margin-top: 4px; }
 
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: white;
+      border: 2px solid #e5e7eb;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #4b5563;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .tab-btn:hover {
+      background: #f9fafb;
+      border-color: #4facfe;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      border-color: #4facfe;
+      box-shadow: 0 4px 16px rgba(79, 172, 254, 0.3);
+    }
+
+    /* Tab Content */
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
     .section { margin-bottom: 28px; }
     .section-title {
       font-size: 1.4rem; font-weight: 800; margin-bottom: 12px; color: #111827;
@@ -174,6 +215,8 @@
       .metrics-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
       .team-card { height: auto; }
       .row { grid-template-columns: 130px 1fr; }
+      .tab-nav { gap: 8px; }
+      .tab-btn { padding: 10px 16px; font-size: 0.85rem; }
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -194,32 +237,77 @@
       <div class="metric-card"><div class="metric-value" id="adoption-rate">-</div><div class="metric-label">Team/Beyond Team Adoption</div></div>
     </div>
 
-    <!-- Team Overview Cards -->
-    <div class="section">
-      <h2 class="section-title">📊 Team Overview</h2>
-      <div class="team-comparison" id="team-cards"></div>
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('overview')">📊 Team Overview</button>
+      <button class="tab-btn" onclick="switchTab('experience')">💡 Sprint Experience & Challenges</button>
+      <button class="tab-btn" onclick="switchTab('future')">🚀 Future Plans & Development</button>
+      <button class="tab-btn" onclick="switchTab('support')">🤝 Support Needs & Barriers</button>
     </div>
 
-    <!-- Detailed tables (unchanged content, compact look) -->
-    <div class="section">
-      <h2 class="section-title">📋 Detailed Feedback Comparison</h2>
-      <div class="comparison-table">
-        <div class="table-header">Sprint Experience & Challenges</div>
-        <table><thead><tr><th>Team</th><th>What Worked Best</th><th>Biggest Challenge</th><th>Suggestions for Improvement</th></tr></thead><tbody id="table-experience"></tbody></table>
+    <!-- Tab: Team Overview -->
+    <div id="tab-overview" class="tab-content active">
+      <div class="section">
+        <h2 class="section-title">📊 Team Overview</h2>
+        <div class="team-comparison" id="team-cards"></div>
       </div>
-      <div class="comparison-table">
-        <div class="table-header">Future Plans & Development</div>
-        <table><thead><tr><th>Team</th><th>Future Vision</th><th>Next Priority Steps</th><th>Timeline</th></tr></thead><tbody id="table-future"></tbody></table>
+    </div>
+
+    <!-- Tab: Sprint Experience & Challenges -->
+    <div id="tab-experience" class="tab-content">
+      <div class="section">
+        <h2 class="section-title">💡 Sprint Experience & Challenges</h2>
+        <div class="comparison-table">
+          <div class="table-header">Sprint Experience & Challenges</div>
+          <table><thead><tr><th>Team</th><th>What Worked Best</th><th>Biggest Challenge</th><th>Suggestions for Improvement</th></tr></thead><tbody id="table-experience"></tbody></table>
+        </div>
       </div>
-      <div class="comparison-table">
-        <div class="table-header">Support Needs & Barriers</div>
-        <table><thead><tr><th>Team</th><th>Support Needed</th><th>Biggest Barriers</th></tr></thead><tbody id="table-support"></tbody></table>
+    </div>
+
+    <!-- Tab: Future Plans & Development -->
+    <div id="tab-future" class="tab-content">
+      <div class="section">
+        <h2 class="section-title">🚀 Future Plans & Development</h2>
+        <div class="comparison-table">
+          <div class="table-header">Future Plans & Development</div>
+          <table><thead><tr><th>Team</th><th>Future Vision</th><th>Next Priority Steps</th><th>Timeline</th></tr></thead><tbody id="table-future"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Support Needs & Barriers -->
+    <div id="tab-support" class="tab-content">
+      <div class="section">
+        <h2 class="section-title">🤝 Support Needs & Barriers</h2>
+        <div class="comparison-table">
+          <div class="table-header">Support Needs & Barriers</div>
+          <table><thead><tr><th>Team</th><th>Support Needed</th><th>Biggest Barriers</th></tr></thead><tbody id="table-support"></tbody></table>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+// Tab switching function
+function switchTab(tabName) {
+  // Hide all tabs
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  
+  // Remove active from all buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Show selected tab
+  document.getElementById('tab-' + tabName).classList.add('active');
+  
+  // Activate clicked button
+  event.target.classList.add('active');
+}
+
 (function () {
   const CSV_URL = 'Sprint 1 Feedback Form-68b904bdfedea2208c5b26ab.csv';
   const HEADER_START = 'Response ID';
