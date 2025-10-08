@@ -221,6 +221,35 @@
   const CSV_URL = 'Sprint 1 Feedback Form-68b904bdfedea2208c5b26ab.csv';
   const HEADER_START = 'Response ID';
 
+  // Team headcounts provided by you
+  const TEAM_HEADCOUNT = new Map([
+    ['AI', 2],
+    ['AI AHA', 3],
+    ['AI Can Do It', 2],
+    ['AI Frontiers', 3],
+    ['AI Newcomer', 3],
+    ['AI-YOYO', 3],
+    ['Bright Bytes', 3],
+    ['DataSage Partners', 3],
+    ["Dumbledore's Army", 2],
+    ['Fast & Curious – Ask more. Build faster.', 3],
+    ['Insight Out (ISO.AI)', 3],
+    ['Insight Out 2 (ISO2.Ai)', 3],
+    ['Minute Makers', 3],
+    ['OE Data Team 1', 3],
+    ['OE Data Team 2', 2],
+    ['PEANUT (Partnerships & Engagement AI Navigation Unit Team)', 3],
+    ['ProcureLogic', 3],
+    ['ProphAI$y', 2],
+    ['Query Quester', 2],
+    ['ReADI (Real-time Analytics & Digital Intelligence)', 3],
+    ['SAGE', 2],
+    ['SPD 1', 3],
+    ['SumUpFollowUp', 2],
+    ['T3 (Tender Tech Titans)', 3],
+    ['The Web Rangers', 2],
+  ]);
+
   const COLS = {
     id: 'Response ID',
     ts: 'Timestamp',
@@ -249,9 +278,8 @@
     for (const [key, cls] of mapping) if (t.startsWith(key)) return cls;
     return 'status-unsure';
   };
-  const uniqNonEmpty = (arr) => [...new Set(arr.map(x => txt(x)).filter(Boolean))];
 
-  // Member color palette (loop if more members)
+  // Member color palette and text color
   const MEMBER_COLORS = [
     '#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9',
     '#BBDEFB', '#B3E5FC', '#B2EBF2', '#B2DFDB', '#C8E6C9',
@@ -270,7 +298,6 @@
     return map;
   }
 
-  // Build a stable member color map per team based on Response ID (fallback to index)
   function buildMemberColorMap(teamRows) {
     const map = new Map();
     teamRows.forEach((r, idx) => {
@@ -311,27 +338,23 @@
     return { avgRating: avg, ratingDist, size: teamRows.length, contCounts, adoptCounts };
   }
 
-  // For table cells: group identical answers and attach colored member chips of contributors
   function groupAnswersWithMembers(teamRows, key) {
-    // Build list of {answer, memberKey, memberIndex}
     const items = [];
     teamRows.forEach((r, idx) => {
       const memberKey = txt(r[COLS.id]) || `idx-${idx}`;
       const raw = txt(r[key]);
       if (!raw) return;
-      // Split on newlines (multiple bullets in text)
       const parts = raw.split('\n').map(s => txt(s)).filter(Boolean);
       if (parts.length === 0) return;
       parts.forEach(p => items.push({ answer: p, memberKey, memberIndex: idx }));
     });
 
-    // Group by identical answer text
     const map = new Map();
     for (const it of items) {
       if (!map.has(it.answer)) map.set(it.answer, []);
       map.get(it.answer).push({ memberKey: it.memberKey, memberIndex: it.memberIndex });
     }
-    return map; // Map<answer, [{memberKey, memberIndex}]>
+    return map;
   }
 
   function render(rows) {
@@ -363,13 +386,16 @@
     const teamCards = document.getElementById('team-cards');
     teamCards.innerHTML = '';
 
-    // Render one card per team
+    // Render team cards (one per team)
     [...byTeam.entries()].sort((a,b) => a[0].localeCompare(b[0])).forEach(([teamName, teamRows]) => {
       const memberColorMap = buildMemberColorMap(teamRows);
       const s = summarizeTeam(teamRows);
       const ratingClass = classifyRatingBadge(s.avgRating ?? 3);
 
-      // Mini rating bars
+      const teamTotal = TEAM_HEADCOUNT.get(teamName);
+      const respondedDisplay = teamTotal ? `${s.size} / ${teamTotal}` : `${s.size} <span style="color:#a0aec0;">of ?</span>`;
+
+      // Rating bars
       const maxCount = Math.max(1, ...s.ratingDist.map(d => d.count));
       const barsHtml = s.ratingDist.map(d => {
         const width = Math.round((d.count / maxCount) * 100);
@@ -398,7 +424,7 @@
         s.adoptCounts.none >= 1 ? `<span class="status-badge status-no">No one: ${s.adoptCounts.none}</span>` : ''
       ].filter(Boolean).join(' ');
 
-      // Member-level collapsible list (kept concise)
+      // Member-level collapsible list with color stripe
       const membersHtml = teamRows.map((r, idx) => {
         const rid = txt(r[COLS.id]);
         const rating = parseRating(r[COLS.rating]) ?? '-';
@@ -431,7 +457,7 @@
           <div class="team-details" style="margin-bottom:10px;">
             <div class="detail-row">
               <div class="detail-label">Members Responded:</div>
-              <div class="detail-value"><strong>${s.size}</strong></div>
+              <div class="detail-value"><strong>${respondedDisplay}</strong></div>
             </div>
             <div class="detail-row" style="align-items:center;">
               <div class="detail-label">Rating Distribution:</div>
@@ -459,7 +485,7 @@
       teamCards.appendChild(card);
     });
 
-    // Aggregated tables with per-member colors
+    // Tables (unchanged from colored-per-member version)
     const tbodyExp = document.getElementById('table-experience');
     const tbodyFuture = document.getElementById('table-future');
     const tbodySupport = document.getElementById('table-support');
@@ -469,8 +495,6 @@
     function renderAnswerCell(teamRows, key) {
       const memberColorMap = buildMemberColorMap(teamRows);
       const grouped = groupAnswersWithMembers(teamRows, key);
-
-      // Build blocks per unique answer with member chips colored by member
       const blocks = [...grouped.entries()].map(([answer, members]) => {
         const chips = members.map(({memberKey, memberIndex}) => {
           const color = memberColorMap.get(memberKey) || MEMBER_COLORS[memberIndex % MEMBER_COLORS.length];
@@ -483,7 +507,6 @@
           </div>
         `;
       });
-
       return blocks.join('');
     }
 
@@ -500,7 +523,7 @@
       <tr>
         <td>
           <strong>${team}</strong><br/>
-          <span style="color:#718096; font-size:0.85rem;">respondents: ${teamRows.length}</span><br/>
+          <span style="color:#718096; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
           <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
         </td>
         <td>${renderAnswerCell(teamRows, COLS.worked)}</td>
@@ -513,7 +536,7 @@
       <tr>
         <td>
           <strong>${team}</strong><br/>
-          <span style="color:#718096; font-size:0.85rem;">respondents: ${teamRows.length}</span><br/>
+          <span style="color:#718096; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
           <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
         </td>
         <td>${renderAnswerCell(teamRows, COLS.vision)}</td>
@@ -526,7 +549,7 @@
       <tr>
         <td>
           <strong>${team}</strong><br/>
-          <span style="color:#718096; font-size:0.85rem;">respondents: ${teamRows.length}</span><br/>
+          <span style="color:#718096; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
           <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
         </td>
         <td>${renderAnswerCell(teamRows, COLS.support)}</td>
@@ -535,7 +558,6 @@
     `).join('');
   }
 
-  // Load CSV with flexible header detection
   fetch(CSV_URL)
     .then(resp => {
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
