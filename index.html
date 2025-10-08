@@ -251,6 +251,25 @@
   };
   const uniqNonEmpty = (arr) => [...new Set(arr.map(x => txt(x)).filter(Boolean))];
 
+  // Simple hash to color-code unique responses consistently within a cell
+  function hashStr(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+    return Math.abs(h);
+  }
+  function chipColorFor(value) {
+    // pastel palette rotated by hash
+    const colors = [
+      '#E3F2FD', '#E8F5E9', '#FFF3E0', '#F3E5F5', '#E0F7FA',
+      '#FCE4EC', '#FFF8E1', '#EDE7F6', '#E0F2F1', '#F1F8E9'
+    ];
+    const idx = hashStr(value) % colors.length;
+    return colors[idx];
+  }
+  function makeChips(values) {
+    return values.map(v => `<span style="display:inline-block; background:${chipColorFor(v)}; color:#2d3748; padding:4px 8px; border-radius:12px; margin:2px; font-size:0.9rem;">${v}</span>`).join('');
+  }
+
   function groupByTeam(rows) {
     const map = new Map();
     for (const r of rows) {
@@ -269,9 +288,7 @@
       count: teamRows.filter(r => parseRating(r[COLS.rating]) === k).length
     }));
 
-    const contCounts = {
-      yes: 0, maybe: 0, no: 0, unsure: 0
-    };
+    const contCounts = { yes: 0, maybe: 0, no: 0, unsure: 0 };
     teamRows.forEach(r => {
       const c = txt(r[COLS.continue]).toLowerCase();
       if (c.startsWith('yes')) contCounts.yes++;
@@ -291,7 +308,7 @@
       else adoptCounts.unsure++;
     });
 
-    const aggList = (key, maxItems = 6) => {
+    const aggList = (key, maxItems = 100) => {
       const vals = uniqNonEmpty(teamRows.flatMap(r => (txt(r[key]) || '').split('\n')));
       return vals.slice(0, maxItems);
     };
@@ -318,7 +335,7 @@
   function render(rows) {
     rows = rows.filter(r => txt(r[COLS.id]) && txt(r[COLS.team]));
 
-    // Global metrics unchanged
+    // Global metrics
     const ratings = rows.map(r => parseRating(r[COLS.rating])).filter(n => n != null);
     const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : null;
     const contYesMaybe = rows.filter(r => {
@@ -329,7 +346,7 @@
 
     const adoptionPos = rows.filter(r => {
       const a = txt(r[COLS.adoption]).toLowerCase();
-      if (!a || a.startsWith('no one') || a.startsWith("i'll")) return false;
+      if (!a || a.startsWith('no one') || a.startsWith("i'll")) return false; // your original heuristic
       return true;
     }).length;
     const adoptionRate = rows.length ? Math.round((adoptionPos / rows.length) * 100) : null;
@@ -344,12 +361,12 @@
     const teamCards = document.getElementById('team-cards');
     teamCards.innerHTML = '';
 
-    // Render one card per team with member count and intra-team differences
+    // Render one card per team
     [...byTeam.entries()].sort((a,b) => a[0].localeCompare(b[0])).forEach(([teamName, teamRows]) => {
       const s = summarizeTeam(teamRows);
       const ratingClass = classifyRatingBadge(s.avgRating ?? 3);
 
-      // Build mini rating bars
+      // Mini rating bars
       const maxCount = Math.max(1, ...s.ratingDist.map(d => d.count));
       const barsHtml = s.ratingDist.map(d => {
         const width = Math.round((d.count / maxCount) * 100);
@@ -364,18 +381,19 @@
         `;
       }).join('');
 
-      const contHtml = `
-        <span class="status-badge ${s.contCounts.yes ? 'status-yes' : 'status-unsure'}">Yes: ${s.contCounts.yes}</span>
-        <span class="status-badge ${s.contCounts.maybe ? 'status-maybe' : 'status-unsure'}">Maybe: ${s.contCounts.maybe}</span>
-        <span class="status-badge ${s.contCounts.no ? 'status-no' : 'status-unsure'}">No: ${s.contCounts.no}</span>
-      `;
+      // Only include chips with count >= 1
+      const contChips = [
+        s.contCounts.yes >= 1 ? `<span class="status-badge status-yes">Yes: ${s.contCounts.yes}</span>` : '',
+        s.contCounts.maybe >= 1 ? `<span class="status-badge status-maybe">Maybe: ${s.contCounts.maybe}</span>` : '',
+        s.contCounts.no >= 1 ? `<span class="status-badge status-no">No: ${s.contCounts.no}</span>` : ''
+      ].filter(Boolean).join(' ');
 
-      const adoptHtml = `
-        <span class="status-badge ${s.adoptCounts.beyond ? 'status-yes' : 'status-unsure'}">Beyond Me: ${s.adoptCounts.beyond}</span>
-        <span class="status-badge ${s.adoptCounts.team ? 'status-team' : 'status-unsure'}">My Team: ${s.adoptCounts.team}</span>
-        <span class="status-badge ${s.adoptCounts.some ? 'status-some' : 'status-unsure'}">Some People: ${s.adoptCounts.some}</span>
-        <span class="status-badge ${s.adoptCounts.none ? 'status-no' : 'status-unsure'}">No one: ${s.adoptCounts.none}</span>
-      `;
+      const adoptChips = [
+        s.adoptCounts.beyond >= 1 ? `<span class="status-badge status-yes">Beyond Me: ${s.adoptCounts.beyond}</span>` : '',
+        s.adoptCounts.team >= 1 ? `<span class="status-badge status-team">My Team: ${s.adoptCounts.team}</span>` : '',
+        s.adoptCounts.some >= 1 ? `<span class="status-badge status-some">Some People: ${s.adoptCounts.some}</span>` : '',
+        s.adoptCounts.none >= 1 ? `<span class="status-badge status-no">No one: ${s.adoptCounts.none}</span>` : ''
+      ].filter(Boolean).join(' ');
 
       // Member-level collapsible list
       const membersHtml = teamRows.map((r, idx) => {
@@ -419,27 +437,11 @@
             </div>
             <div class="detail-row">
               <div class="detail-label">Continue Beyond Sprint:</div>
-              <div class="detail-value" style="display:flex; gap:8px; flex-wrap:wrap;">${contHtml}</div>
+              <div class="detail-value" style="display:flex; gap:8px; flex-wrap:wrap;">${contChips || '<span style="color:#718096;">—</span>'}</div>
             </div>
             <div class="detail-row">
               <div class="detail-label">Adoption:</div>
-              <div class="detail-value" style="display:flex; gap:8px; flex-wrap:wrap;">${adoptHtml}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Distinct Themes (Worked Best):</div>
-              <div class="detail-value">
-                <ul style="padding-left:18px; color:#2d3748;">
-                  ${s.agg.worked.map(x => `<li>${x}</li>`).join('')}
-                </ul>
-              </div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Distinct Themes (Challenges):</div>
-              <div class="detail-value">
-                <ul style="padding-left:18px; color:#2d3748;">
-                  ${s.agg.challenge.map(x => `<li>${x}</li>`).join('')}
-                </ul>
-              </div>
+              <div class="detail-value" style="display:flex; gap:8px; flex-wrap:wrap;">${adoptChips || '<span style="color:#718096;">—</span>'}</div>
             </div>
             <div class="detail-row">
               <div class="detail-label">Members’ Responses:</div>
@@ -453,7 +455,7 @@
       teamCards.appendChild(card);
     });
 
-    // Aggregated tables (one row per team with merged distinct answers)
+    // Aggregated tables: one row per team, with color-coded chips for distinct responses
     const tbodyExp = document.getElementById('table-experience');
     const tbodyFuture = document.getElementById('table-future');
     const tbodySupport = document.getElementById('table-support');
@@ -462,33 +464,53 @@
       .map(([team, teamRows]) => ({ team, rows: teamRows, summary: summarizeTeam(teamRows) }))
       .sort((a,b) => a.team.localeCompare(b.team));
 
-    tbodyExp.innerHTML = teamSummaries.map(({team, summary}) => `
+    const respondentChips = (rows) => {
+      // Show small neutral chips for each respondent to reflect n and enable quick count
+      return rows.map((r, i) => `<span class="status-badge status-unsure" title="ID ${txt(r[COLS.id])}" style="background:#edf2f7; color:#4a5568; margin:2px;">#${i+1}</span>`).join('');
+    };
+
+    const chipsForList = (arr) => makeChips(arr);
+
+    tbodyExp.innerHTML = teamSummaries.map(({team, rows, summary}) => `
       <tr>
-        <td><strong>${team}</strong><br/><span style="color:#718096; font-size:0.85rem;">n=${summary.size}</span></td>
-        <td><ul style="padding-left:18px;">${summary.agg.worked.map(x => `<li>${x}</li>`).join('')}</ul></td>
-        <td><ul style="padding-left:18px;">${summary.agg.challenge.map(x => `<li>${x}</li>`).join('')}</ul></td>
-        <td><ul style="padding-left:18px;">${summary.agg.better.map(x => `<li>${x}</li>`).join('')}</ul></td>
+        <td>
+          <strong>${team}</strong><br/>
+          <span style="color:#718096; font-size:0.85rem;">respondents: ${rows.length}</span><br/>
+          <div style="margin-top:4px;">${respondentChips(rows)}</div>
+        </td>
+        <td>${chipsForList(summary.agg.worked)}</td>
+        <td>${chipsForList(summary.agg.challenge)}</td>
+        <td>${chipsForList(summary.agg.better)}</td>
       </tr>
     `).join('');
 
-    tbodyFuture.innerHTML = teamSummaries.map(({team, summary}) => `
+    tbodyFuture.innerHTML = teamSummaries.map(({team, rows, summary}) => `
       <tr>
-        <td><strong>${team}</strong><br/><span style="color:#718096; font-size:0.85rem;">n=${summary.size}</span></td>
-        <td><ul style="padding-left:18px;">${summary.agg.vision.map(x => `<li>${x}</li>`).join('')}</ul></td>
-        <td><ul style="padding-left:18px;">${summary.agg.steps.map(x => `<li>${x}</li>`).join('')}</ul></td>
-        <td>${summary.agg.timeline.join('<br/>')}</td>
+        <td>
+          <strong>${team}</strong><br/>
+          <span style="color:#718096; font-size:0.85rem;">respondents: ${rows.length}</span><br/>
+          <div style="margin-top:4px;">${respondentChips(rows)}</div>
+        </td>
+        <td>${chipsForList(summary.agg.vision)}</td>
+        <td>${chipsForList(summary.agg.steps)}</td>
+        <td>${chipsForList(summary.agg.timeline)}</td>
       </tr>
     `).join('');
 
-    tbodySupport.innerHTML = teamSummaries.map(({team, summary}) => `
+    tbodySupport.innerHTML = teamSummaries.map(({team, rows, summary}) => `
       <tr>
-        <td><strong>${team}</strong><br/><span style="color:#718096; font-size:0.85rem;">n=${summary.size}</span></td>
-        <td><ul style="padding-left:18px;">${summary.agg.support.map(x => `<li>${x}</li>`).join('')}</ul></td>
-        <td><ul style="padding-left:18px;">${summary.agg.barriers.map(x => `<li>${x}</li>`).join('')}</ul></td>
+        <td>
+          <strong>${team}</strong><br/>
+          <span style="color:#718096; font-size:0.85rem;">respondents: ${rows.length}</span><br/>
+          <div style="margin-top:4px;">${respondentChips(rows)}</div>
+        </td>
+        <td>${chipsForList(summary.agg.support)}</td>
+        <td>${chipsForList(summary.agg.barriers)}</td>
       </tr>
     `).join('');
   }
 
+  // Load CSV with flexible header detection
   fetch(CSV_URL)
     .then(resp => {
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
