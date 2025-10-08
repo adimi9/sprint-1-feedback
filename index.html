@@ -233,8 +233,8 @@
     <div class="metrics-grid">
       <div class="metric-card"><div class="metric-value" id="avg-rating">-</div><div class="metric-label">Average Rating</div></div>
       <div class="metric-card"><div class="metric-value" id="total-responses">-</div><div class="metric-label">Total Responses</div></div>
-      <div class="metric-card"><div class="metric-value" id="continuation-rate">-</div><div class="metric-label">Continuation Rate (Yes/)</div></div>
-      <div class="metric-card"><div class="metric-value" id="adoption-rate">-</div><div class="metric-label">Team/Beyond Team Adoption</div></div>
+      <div class="metric-card"><div class="metric-value" id="continuation-rate">-</div><div class="metric-label">Continuation Rate (Yes)</div></div>
+      <div class="metric-card"><div class="metric-value" id="adoption-rate">-</div><div class="metric-label">Beyond Team Adoption</div></div>
     </div>
 
     <!-- Tab Navigation -->
@@ -406,15 +406,15 @@ function switchTab(tabName) {
     // Metrics
     const ratings = rows.map(r => parseRating(r[COLS.rating])).filter(n => n != null);
     const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : null;
-    const contYesMaybe = rows.filter(r => {
+    const contYes = rows.filter(r => {
       const c = txt(r[COLS.continue]).toLowerCase();
-      return c.startsWith('yes') || c.startsWith('maybe');
+      return c.startsWith('yes');
     }).length;
-    const contRate = rows.length ? Math.round((contYesMaybe / rows.length) * 100) : null;
+    const contRate = rows.length ? Math.round((contYes / rows.length) * 100) : null;
 
     const adoptionPos = rows.filter(r => {
       const a = txt(r[COLS.adoption]).toLowerCase();
-      return a && !a.startsWith('no one');
+      return a.startsWith('some people beyond') || a.startsWith('my division loves'); /* dream big */
     }).length;
     const adoptionRate = rows.length ? Math.round((adoptionPos / rows.length) * 100) : null;
 
