@@ -82,12 +82,8 @@
     }
 
     /* Tab Content */
-    .tab-content {
-      display: none;
-    }
-    .tab-content.active {
-      display: block;
-    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
     .section { margin-bottom: 28px; }
     .section-title {
@@ -104,7 +100,7 @@
     @media (max-width: 1200px) { .team-comparison { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 640px) { .team-comparison { grid-template-columns: 1fr; } }
 
-    /* Square-ish card with header + stacked content */
+    /* Team card */
     .team-card {
       background: #ffffff;
       border-radius: 16px;
@@ -120,7 +116,7 @@
     .team-card:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,0.08); }
     @media (max-width: 768px) { .team-card { height: auto; } }
 
-    /* Header: title + division pill, and responded info below title */
+    /* Header */
     .team-header {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -129,31 +125,29 @@
       border-bottom: 1px solid #f1f5f9;
       margin-bottom: 10px;
     }
-    .team-title {
-      display: flex; flex-direction: column;
-    }
+    .team-title { display: flex; flex-direction: column; }
     .team-name { font-weight: 900; color: #0f172a; font-size: 1.05rem; line-height: 1.1; }
     .responded-note { color: #6b7280; font-size: 0.84rem; margin-top: 2px; }
-    .division-pill {
+
+    /* Pills */
+    .division-pill, .problem-pill {
       align-self: start;
       background:#e8f0ff; color:#1e40af; padding:6px 10px; border-radius:999px;
       font-weight: 500; font-size: 0.82rem; white-space: nowrap;
       border: 1px solid #cfe0ff;
+      display: inline-block;
+    }
+    .problem-pill {
+      background:#f0f9ff; color:#075985; border-color:#bae6fd;
     }
 
-    /* Single column stack */
-    .stack {
-      display: grid;
-      gap: 12px;
-      min-height: 0;
-      overflow: auto;
-      padding-right: 2px;
-    }
+    /* Stack */
+    .stack { display: grid; gap: 12px; min-height: 0; overflow: auto; padding-right: 2px; }
     .row { display: block; }
     .label { color:#1f2937; font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; }
     .pill-group { display:flex; flex-wrap: wrap; gap: 6px; }
 
-    /* Pills */
+    /* Data pills */
     .pill {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 4px 8px; border-radius: 999px; font-weight: 600;
@@ -170,14 +164,12 @@
     .pill-rating-3 { background:#f59e0b; color:#fff; border-color:#f59e0b; }
     .pill-soft { background:#fef3c7; color:#92400e; border-color:#fde68a; }
 
-    /* Member tag for TEAM CARDS */
+    /* Member chips */
     .mchip-card {
       display:inline-flex; align-items:center; gap:4px; padding:3px 7px;
       border-radius:12px; font-size:0.78rem; color:#0f172a;
       border: 1px solid rgba(0,0,0,0.06);
     }
-
-    /* Member tag (index + color) - for TABLES with colored background */
     .mchip {
       display:inline-flex; align-items:center; gap:4px; padding:4px 8px;
       border-radius:12px; font-size:0.78rem; font-weight: 600;
@@ -200,9 +192,7 @@
     .answer-block {
       background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:6px 8px; margin:4px 0;
     }
-    .answer-block .text {
-      color:#111827; margin-bottom:4px; line-height:1.35;
-    }
+    .answer-block .text { color:#111827; margin-bottom:4px; line-height:1.35; }
 
     @media (max-width: 768px) {
       .dashboard-container { margin: 10px; border-radius: 15px; }
@@ -236,7 +226,7 @@
 
     <!-- Tab Navigation -->
     <div class="tab-nav">
-      <button class="tab-btn active" onclick="switchTab('overview')">📊 Team Overview</button>
+      - <button class="tab-btn active" onclick="switchTab('overview')">📊 Team Overview</button>
       <button class="tab-btn" onclick="switchTab('experience')">💡 Sprint Experience & Challenges</button>
       <button class="tab-btn" onclick="switchTab('future')">🚀 Future Plans & Development</button>
       <button class="tab-btn" onclick="switchTab('support')">🤝 Support Needs & Barriers</button>
@@ -256,12 +246,7 @@
         <h2 class="section-title">💡 Sprint Experience & Challenges</h2>
         <div class="comparison-table">
           <div class="table-header">Sprint Experience & Challenges</div>
-          <table>
-            <thead>
-              <tr><th>Team</th><th>What Worked Best</th><th>Biggest Challenge</th><th>Suggestions for Improvement</th></tr>
-            </thead>
-            <tbody id="table-experience"></tbody>
-          </table>
+          <table><thead><tr><th>Team</th><th>What Worked Best</th><th>Biggest Challenge</th><th>Suggestions for Improvement</th></tr></thead><tbody id="table-experience"></tbody></table>
         </div>
       </div>
     </div>
@@ -272,12 +257,7 @@
         <h2 class="section-title">🚀 Future Plans & Development</h2>
         <div class="comparison-table">
           <div class="table-header">Future Plans & Development</div>
-          <table>
-            <thead>
-              <tr><th>Team</th><th>Future Vision</th><th>Next Priority Steps</th><th>Timeline</th></tr>
-            </thead>
-            <tbody id="table-future"></tbody>
-          </table>
+          <table><thead><tr><th>Team</th><th>Future Vision</th><th>Next Priority Steps</th><th>Timeline</th></tr></thead><tbody id="table-future"></tbody></table>
         </div>
       </div>
     </div>
@@ -288,12 +268,7 @@
         <h2 class="section-title">🤝 Support Needs & Barriers</h2>
         <div class="comparison-table">
           <div class="table-header">Support Needs & Barriers</div>
-          <table>
-            <thead>
-              <tr><th>Team</th><th>Support Needed</th><th>Biggest Barriers</th></tr>
-            </thead>
-            <tbody id="table-support"></tbody>
-          </table>
+          <table><thead><tr><th>Team</th><th>Support Needed</th><th>Biggest Barriers</th></tr></thead><tbody id="table-support"></tbody></table>
         </div>
       </div>
     </div>
@@ -301,7 +276,7 @@
 </div>
 
 <script>
-// Tab switching function
+// Tab switching
 function switchTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -313,6 +288,7 @@ function switchTab(tabName) {
   const CSV_URL = 'Sprint 1 Feedback Form-68b904bdfedea2208c5b26ab.csv';
   const HEADER_START = 'Response ID';
 
+  // Team headcount
   const TEAM_HEADCOUNT = new Map([
     ['AI', 2], ['AI AHA', 3], ['AI Can Do It', 2], ['AI Frontiers', 3],
     ['AI Newcomer', 3], ['AI-YOYO', 3], ['Bright Bytes', 3],
@@ -325,6 +301,35 @@ function switchTab(tabName) {
     ['ReADI (Real-time Analytics & Digital Intelligence)', 3],
     ['SAGE', 2], ['SPD 1', 3], ['SumUpFollowUp', 2], ['T3 (Tender Tech Titans)', 3],
     ['The Web Rangers', 2],
+  ]);
+
+  // Team -> Problem mapping (provided)
+  const TEAM_PROBLEM = new Map([
+    ['AI', 'Problem A'],
+    ['AI AHA', 'Problem C'],
+    ['AI Can Do It', 'Problem C'],
+    ['AI Frontiers', 'Problem C'],
+    ['AI Newcomer', 'Problem C (Cross-Div)'],
+    ['AI-YOYO', 'Problem B'],
+    ['Bright Bytes', 'Problem C'],
+    ['DataSage Partners', 'Problem C'],
+    ["Dumbledore's Army", 'Problem C'],
+    ['Fast & Curious – Ask more. Build faster.', 'Problem C'],
+    ['Insight Out (ISO.AI)', 'Problem C'],
+    ['Insight Out 2 (ISO2.Ai)', 'Problem B'],
+    ['Minute Makers', 'Problem A'],
+    ['OE Data Team 1', 'Problem C'],
+    ['OE Data Team 2', 'Problem C'],
+    ['PEANUT (Partnerships & Engagement AI Navigation Unit Team)', 'Problem A'],
+    ['ProcureLogic', 'Problem C'],
+    ['ProphAI$y', 'Problem C'],
+    ['Query Quester', 'Problem C'],
+    ['ReADI (Real-time Analytics & Digital Intelligence)', 'Problem C'],
+    ['SAGE', 'Problem C'],
+    ['SPD 1', 'Problem A'],
+    ['SumUpFollowUp', 'Problem B'],
+    ['T3 (Tender Tech Titans)', 'Problem C'],
+    ['The Web Rangers', 'Problem C'],
   ]);
 
   const COLS = {
@@ -350,13 +355,13 @@ function switchTab(tabName) {
   const txt = (v) => (v == null ? '' : String(v).trim());
   const parseRating = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
 
+  // Member colors (for #1 #2 #3 chips)
   const MEMBER_COLORS = [
     '#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9',
     '#BBDEFB', '#B3E5FC', '#B2EBF2', '#B2DFDB', '#C8E6C9',
     '#DCEDC8', '#F0F4C3', '#FFF9C4', '#FFECB3', '#FFE0B2',
     '#FFCCBC', '#D7CCC8', '#CFD8DC'
   ];
-
   const groupByTeam = (rows) => {
     const map = new Map();
     for (const r of rows) {
@@ -366,11 +371,10 @@ function switchTab(tabName) {
     }
     return map;
   };
-
   function memberColor(idx) { return MEMBER_COLORS[idx % MEMBER_COLORS.length]; }
-
   function getTextColor(bgColor) {
     const hex = bgColor.replace('#', '');
+    if (hex.length !== 6) return '#0f172a';
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
@@ -407,19 +411,25 @@ function switchTab(tabName) {
     return 'pill-rating-3';
   }
 
+  // Division + Problem pill helpers
   function divisionPill(division) {
     const d = txt(division) || '—';
-    return `<div class="division-pill" style="display:inline-block; margin-top:8px;">${d}</div>`;
+    return `<div class="division-pill" style="margin-top:8px;">${d}</div>`;
+  }
+  function problemPill(teamName) {
+    const problem = TEAM_PROBLEM.get(teamName) || '—';
+    return `<div class="problem-pill" style="margin-top:6px;">${problem}</div>`;
   }
 
   function render(rows) {
+    // Keep only valid rows
     rows = rows.filter(r => txt(r[COLS.id]) && txt(r[COLS.team]));
 
+    // Metrics
     const ratings = rows.map(r => parseRating(r[COLS.rating])).filter(n => n != null);
     const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : null;
     const contYes = rows.filter(r => txt(r[COLS.continue]).toLowerCase().startsWith('yes')).length;
     const contRate = rows.length ? Math.round((contYes / rows.length) * 100) : null;
-
     const adoptionPos = rows.filter(r => {
       const a = txt(r[COLS.adoption]).toLowerCase();
       return a.startsWith('some people beyond') || a.startsWith('my division loves');
@@ -431,7 +441,7 @@ function switchTab(tabName) {
     document.getElementById('continuation-rate').textContent = contRate != null ? `${contRate}%` : '-';
     document.getElementById('adoption-rate').textContent = adoptionRate != null ? `${adoptionRate}%` : '-';
 
-    // Team cards
+    // Team Overview cards
     const byTeam = groupByTeam(rows);
     const teamCards = document.getElementById('team-cards');
     teamCards.innerHTML = '';
@@ -480,7 +490,10 @@ function switchTab(tabName) {
               <div class="team-name">${teamName}</div>
               <div class="responded-note">(${responded} responded)</div>
             </div>
-            <div class="division-pill" title="Division">${division}</div>
+            <div>
+              <div class="division-pill" title="Division">${division}</div>
+              <div>${problemPill(teamName)}</div>
+            </div>
           </div>
 
           <div class="stack">
@@ -507,11 +520,10 @@ function switchTab(tabName) {
       teamCards.appendChild(card);
     });
 
-    // Tables with colored member chips and division pill
+    // Tables
     const tbodyExp = document.getElementById('table-experience');
     const tbodyFuture = document.getElementById('table-future');
     const tbodySupport = document.getElementById('table-support');
-
     const teamEntries = [...byTeam.entries()].sort((a,b) => a[0].localeCompare(b[0]));
 
     function groupAnswersWithMembers(teamRows, key) {
@@ -551,58 +563,45 @@ function switchTab(tabName) {
       }).join('');
     }
 
-    tbodyExp.innerHTML = teamEntries.map(([team, teamRows]) => {
+    function teamMetaCell(teamName, teamRows) {
       const division = txt(teamRows[0][COLS.division]) || '—';
       return `
+        <strong>${teamName}</strong><br/>
+        <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(teamName) ? ` / ${TEAM_HEADCOUNT.get(teamName)}` : ''}</span><br/>
+        <div style="margin-top:6px;">${respondentLegend(teamRows)}</div>
+        ${divisionPill(division)}
+        ${problemPill(teamName)}
+      `;
+    }
+
+    tbodyExp.innerHTML = teamEntries.map(([team, teamRows]) => `
       <tr>
-        <td>
-          <strong>${team}</strong><br/>
-          <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
-          <div style="margin-top:6px;">${respondentLegend(teamRows)}</div>
-          ${divisionPill(division)}
-        </td>
+        <td>${teamMetaCell(team, teamRows)}</td>
         <td>${renderAnswerCell(teamRows, COLS.worked)}</td>
         <td>${renderAnswerCell(teamRows, COLS.challenge)}</td>
         <td>${renderAnswerCell(teamRows, COLS.better)}</td>
       </tr>
-      `;
-    }).join('');
+    `).join('');
 
-    tbodyFuture.innerHTML = teamEntries.map(([team, teamRows]) => {
-      const division = txt(teamRows[0][COLS.division]) || '—';
-      return `
+    tbodyFuture.innerHTML = teamEntries.map(([team, teamRows]) => `
       <tr>
-        <td>
-          <strong>${team}</strong><br/>
-          <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
-          <div style="margin-top:6px;">${respondentLegend(teamRows)}</div>
-          ${divisionPill(division)}
-        </td>
+        <td>${teamMetaCell(team, teamRows)}</td>
         <td>${renderAnswerCell(teamRows, COLS.vision)}</td>
         <td>${renderAnswerCell(teamRows, COLS.steps)}</td>
         <td>${renderAnswerCell(teamRows, COLS.timeline)}</td>
       </tr>
-      `;
-    }).join('');
+    `).join('');
 
-    tbodySupport.innerHTML = teamEntries.map(([team, teamRows]) => {
-      const division = txt(teamRows[0][COLS.division]) || '—';
-      return `
+    tbodySupport.innerHTML = teamEntries.map(([team, teamRows]) => `
       <tr>
-        <td>
-          <strong>${team}</strong><br/>
-          <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
-          <div style="margin-top:6px;">${respondentLegend(teamRows)}</div>
-          ${divisionPill(division)}
-        </td>
+        <td>${teamMetaCell(team, teamRows)}</td>
         <td>${renderAnswerCell(teamRows, COLS.support)}</td>
         <td>${renderAnswerCell(teamRows, COLS.barriers)}</td>
       </tr>
-      `;
-    }).join('');
+    `).join('');
   }
 
-  // Load CSV
+  // Load CSV (trim any preface before header)
   fetch(CSV_URL)
     .then(resp => resp.ok ? resp.text() : Promise.reject(new Error(`HTTP ${resp.status}`)))
     .then(text => {
