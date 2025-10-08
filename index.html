@@ -472,7 +472,7 @@ function switchTab(tabName) {
           const rid = txt(r[COLS.id]);
          return `
   <span class="mchip-card pill ${pillClassFn(val)}" title="ID: ${rid}">
-    <span class="idx-circle">${idx+1}</span><span class="sep"></span>
+    <span class="idx-circle">${idx+1}</span></span>
     <span>${display}</span>
   </span>
 `;
@@ -513,7 +513,7 @@ function switchTab(tabName) {
         const rid = txt(r[COLS.id]);
         return `
   <span class="mchip-card pill ${pillClassForRating(n)}" title="ID: ${rid}">
-    <span class="idx-circle">${idx+1}</span><span class="sep"></span>
+    <span class="idx-circle">${idx+1}</span></span>
     <span>${n.toFixed(1)}</span>
   </span>
 `;
@@ -587,7 +587,7 @@ function switchTab(tabName) {
         const color = memberColor(idx);
         const rid = txt(r[COLS.id]);
         return `<span title="ID ${rid}" class="mchip" style="background:#fff;">
-  <span class="idx-circle">${idx+1}</span><span class="sep"></span>
+  <span class="idx-circle">${idx+1}</span></span>
   <span class="dot" style="background:${color};"></span>
 </span>`;
       }).join('');
@@ -599,7 +599,7 @@ function switchTab(tabName) {
         const chips = members.map(({idx, id}) => {
           const color = memberColor(idx);
           return `<span class="mchip" title="ID: ${id}">
-  <span class="idx-circle">${idx+1}</span><span class="sep"></span>
+  <span class="idx-circle">${idx+1}</span></span>
   <span class="dot" style="background:${color};"></span>
 </span>`;
         }).join('');
