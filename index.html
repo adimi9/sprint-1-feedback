@@ -618,122 +618,244 @@ The solution works well for me. No immediate further problem or enhancement requ
     </div>
 </div>
 </body>
-       <script>
-        (function () {
-          // Helper: safely get text content
-          const getText = (el) => (el ? el.textContent.trim() : "");
-        
-          // 1) Collect ratings from all team cards
-          const ratingBadges = Array.from(document.querySelectorAll(".team-card .rating-badge"));
-          const ratings = ratingBadges.map(badge => {
-            const m = getText(badge).match(/(\d+(?:\.\d+)?)\s*\/\s*5/);
-            return m ? parseFloat(m[1]) : null;
-          }).filter(n => typeof n === "number" && !Number.isNaN(n));
-        
-          // Compute average rating (out of 5)
-          let avgRating = null;
-          if (ratings.length > 0) {
-            const sum = ratings.reduce((a, b) => a + b, 0);
-            avgRating = sum / ratings.length;
-          }
-        
-          // 2) Compute "Yes" and "Maybe" continuation rate
-          // We look for detail-row where label is "Continue Beyond Sprint:"
-          const continueRows = Array.from(document.querySelectorAll(".team-card .detail-row"))
-            .filter(row => {
-              const label = row.querySelector(".detail-label");
-              return getText(label).toLowerCase().startsWith("continue beyond sprint");
-            });
-        
-          const totalConsidered = continueRows.length; // denominator for percentage
-          let yesCount = 0;
-        
-          continueRows.forEach(row => {
-            const value = row.querySelector(".detail-value");
-            const text = getText(value).toLowerCase();
-            // Starts with "yes"
-            if (text.startsWith("yes") || text.startsWith("maybe")) {
-              yesCount += 1;
-            }
+    <script>
+    // Minimal CSV parser (handles quoted commas and newlines)
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], val = '', inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i], n = text[i+1];
+        if (inQuotes) {
+          if (c === '"' && n === '"') { val += '"'; i++; }
+          else if (c === '"') { inQuotes = false; }
+          else { val += c; }
+        } else {
+          if (c === '"') inQuotes = true;
+          else if (c === ',') { row.push(val); val = ''; }
+          else if (c === '\n') { row.push(val); rows.push(row); row = []; val = ''; }
+          else if (c === '\r') { /* ignore */ }
+          else { val += c; }
+        }
+      }
+      // push last value
+      if (val !== '' || row.length) { row.push(val); rows.push(row); }
+      return rows;
+    }
+    
+    // Lenient header lookup helper
+    function colIndex(headers, ...candidates) {
+      const h = headers.map(h => h.trim().toLowerCase());
+      for (const cand of candidates) {
+        const lc = cand.toLowerCase();
+        // exact
+        let idx = h.indexOf(lc);
+        if (idx !== -1) return idx;
+        // lenient substring
+        idx = h.findIndex(x => x.includes(lc));
+        if (idx !== -1) return idx;
+      }
+      return -1;
+    }
+    
+    // Normalize text
+    const norm = (s) => (s || '').toString().trim();
+    const lower = (s) => norm(s).toLowerCase();
+    
+    // Date pretty
+    function prettyTimestamp(ts) {
+      try {
+        // handle known format: "19 Sep 2025 07:57:56 PM"
+        const d = new Date(ts);
+        if (!isNaN(d.getTime())) {
+          return d.toLocaleString(undefined, {
+            weekday: 'short', day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
           });
-        
-          let yesRatePct = null;
-          if (totalConsidered > 0) {
-            yesRatePct = (yesCount / totalConsidered) * 100;
-          }
-        
-          // 3) Compute "Team/Beyond Team Adoption" rate
-          // We look for detail-row where label is "Continue Beyond Sprint:"
-          const adoptionRows = Array.from(document.querySelectorAll(".team-card .detail-row"))
-            .filter(row => {
-              const label = row.querySelector(".detail-label");
-              return getText(label).toLowerCase().startsWith("continue beyond sprint");
-            });
-        
-          const totalAdoption = adoptionRows.length; // denominator for percentage
-        
-          let beyondMeCount = 0;
-        
-          continueRows.forEach(row => {
-            const value = row.querySelector(".detail-value");
-            const text = getText(value).toLowerCase();
-            // Starts with "yes"
-            if (!text.startsWith("no") && !text.startsWith("i'll")) {
-              beyondMeCount += 1;
-            }
-          });
-        
-          let beyondMeRate = null;
-          if (totalAdoption > 0) {
-            beyondMeRate = (beyondMeCount / totalAdoption) * 100;
-          }
-        
-          // 4) Update the top metric cards by their labels
-          const metricCards = Array.from(document.querySelectorAll(".metrics-grid .metric-card"));
-          const findMetricByLabel = (labelText) => {
-            const lowerTarget = labelText.toLowerCase();
-            return metricCards.find(card => {
-              const labelEl = card.querySelector(".metric-label");
-              return labelEl && getText(labelEl).toLowerCase() === lowerTarget;
-            });
-          };
-        
-          // Update Average Rating
-          if (avgRating !== null) {
-            const avgCard = findMetricByLabel("Average Rating");
-            if (avgCard) {
-              const valueEl = avgCard.querySelector(".metric-value");
-              if (valueEl) {
-                // Round to one decimal place
-                valueEl.textContent = (Math.round(avgRating * 10) / 10).toFixed(1);
-              }
-            }
-          }
-        
-          // Update Continuation Rate (Yes/Maybe/Unsure) with % of "Yes"
-          if (yesRatePct !== null) {
-            const contCard = findMetricByLabel("Continuation Rate (Yes/Maybe)");
-            if (contCard) {
-              const valueEl = contCard.querySelector(".metric-value");
-              if (valueEl) {
-                // Round to nearest whole number (or keep 0 decimals)
-                valueEl.textContent = `${Math.round(yesRatePct)}%`;
-              }
-            }
-          }
-
-           // Update Team/Beyond Team Adoption Rate with %
-          if (beyondMeRate !== null) {
-            const contCard = findMetricByLabel("Team/Beyond Team Adoption");
-            if (contCard) {
-              const valueEl = contCard.querySelector(".metric-value");
-              if (valueEl) {
-                // Round to nearest whole number (or keep 0 decimals)
-                valueEl.textContent = `${Math.round(beyondMeRate)}%`;
-              }
-            }
-          }
-        
-        })();
+        }
+      } catch {}
+      return ts;
+    }
+    
+    // Badge helpers
+    function ratingClass(n) {
+      if (n >= 5) return 'rating-5';
+      if (n >= 4) return 'rating-4';
+      return 'rating-3';
+    }
+    function statusBadge(text) {
+      const t = lower(text);
+      let cls = 'status-maybe';
+      if (t.startsWith('no') || t === 'none' || t === 'no one') cls = 'status-no';
+      else if (t.startsWith('yes') || t.includes('definitely')) cls = 'status-yes';
+      else if (t.includes('unsure')) cls = 'status-unsure';
+      else if (t.includes("i'll") || t.includes('immediate team')) cls = 'status-team';
+      else if (t.includes('some')) cls = 'status-some';
+      return `<span class="status-badge ${cls}">${text || '-'}</span>`;
+    }
+    
+    (async function () {
+      // 1) Load CSV
+      const resp = await fetch('data/sprint1_feedback.csv');
+      const text = await resp.text();
+    
+      // 2) Parse
+      const rows = parseCSV(text);
+      if (!rows.length) return;
+      const headers = rows[0];
+      const dataRows = rows.slice(1).filter(r => r.length === headers.length);
+    
+      // 3) Map columns (lenient)
+      const idx = {
+        responseId: colIndex(headers, 'Response ID', 'ID'),
+        ts: colIndex(headers, 'Timestamp', 'Submitted at'),
+        team: colIndex(headers, 'Which Sprint team are you from?', 'Team'),
+        division: colIndex(headers, 'Which division are you from?', 'Division'),
+        rating: colIndex(headers, 'On a scale of 1-5', 'rate your', 'rating'),
+        worked: colIndex(headers, 'What worked best', 'worked best'),
+        challenge: colIndex(headers, 'biggest challenge', 'challenge'),
+        improve: colIndex(headers, 'Anything you would like us to do better', 'improve', 'suggest'),
+        adoption: colIndex(headers, 'How is the adoption', 'adoption'),
+        vision: colIndex(headers, 'Where do you envision', 'envision', 'vision'),
+        continue: colIndex(headers, 'Do you plan to continue', 'continue'),
+        nextSteps: colIndex(headers, 'next 2-3 priority steps', 'next', 'priority steps'),
+        timeline: colIndex(headers, 'realistic timeline', 'timeline'),
+        support: colIndex(headers, 'support would be most valuable', 'support'),
+        barriers: colIndex(headers, 'biggest barriers', 'barriers'),
+        followup: colIndex(headers, 'ongoing check-ins', 'follow-up', 'follow up')
+      };
+    
+      // 4) Build normalized objects
+      const records = dataRows.map(r => ({
+        responseId: norm(r[idx.responseId]),
+        timestamp: norm(r[idx.ts]),
+        team: norm(r[idx.team]),
+        division: norm(r[idx.division]),
+        rating: parseFloat(norm(r[idx.rating])) || null,
+        worked: norm(r[idx.worked]),
+        challenge: norm(r[idx.challenge]),
+        improve: norm(r[idx.improve]),
+        adoption: norm(r[idx.adoption]),
+        vision: norm(r[idx.vision]),
+        cont: norm(r[idx.continue]),
+        nextSteps: norm(r[idx.nextSteps]),
+        timeline: norm(r[idx.timeline]),
+        support: norm(r[idx.support]),
+        barriers: norm(r[idx.barriers]),
+        followup: norm(r[idx.followup])
+      })).filter(x => x.team);
+    
+      // 5) Compute metrics
+      const ratings = records.map(x => x.rating).filter(n => typeof n === 'number' && !Number.isNaN(n));
+      const avgRating = ratings.length ? (ratings.reduce((a,b)=>a+b,0) / ratings.length) : 0;
+    
+      const continueTexts = records.map(x => lower(x.cont));
+      const considered = continueTexts.length;
+      const yesMaybe = continueTexts.filter(t => t.startsWith('yes') || t.startsWith('maybe')).length;
+      const continuationRate = considered ? Math.round((yesMaybe / considered) * 100) : 0;
+    
+      const adoptionTexts = records.map(x => lower(x.adoption));
+      const adoptDen = adoptionTexts.length;
+      const adoptCount = adoptionTexts.filter(t => t && t !== 'no one' && !t.startsWith("i'll")).length;
+      const adoptionRate = adoptDen ? Math.round((adoptCount / adoptDen) * 100) : 0;
+    
+      // 6) Update top metrics
+      const getText = (el) => (el ? el.textContent.trim() : "");
+      const metricCards = Array.from(document.querySelectorAll(".metrics-grid .metric-card"));
+      const findMetricByLabel = (labelText) => {
+        const lowerTarget = labelText.toLowerCase();
+        return metricCards.find(card => {
+          const labelEl = card.querySelector(".metric-label");
+          return labelEl && getText(labelEl).toLowerCase() === lowerTarget;
+        });
+      };
+      const setMetric = (label, value) => {
+        const card = findMetricByLabel(label);
+        if (card) {
+          const v = card.querySelector(".metric-value");
+          if (v) v.textContent = value;
+        }
+      };
+    
+      setMetric("Average Rating", avgRating ? avgRating.toFixed(1) : "0.0");
+      setMetric("Total Responses", String(records.length));
+      setMetric("Continuation Rate (Yes/Maybe)", `${continuationRate}%`);
+      setMetric("Team/Beyond Team Adoption", `${adoptionRate}%`);
+    
+      // 7) Hydrate Team Overview cards
+      const teamGrid = document.querySelector(".team-comparison");
+      if (teamGrid) {
+        teamGrid.innerHTML = ''; // clear existing
+        records.forEach(rec => {
+          const ratingNum = rec.rating || 0;
+          const rCls = ratingClass(ratingNum);
+          const card = document.createElement('div');
+          card.className = 'team-card';
+          card.innerHTML = `
+            <div class="team-header">
+              <div class="team-name">${rec.team}</div>
+              <div class="rating-badge ${rCls}">${ratingNum ? `${ratingNum}/5` : '-'}</div>
+            </div>
+            <div class="response-id">Response ID: ${rec.responseId || '-'}</div>
+            <div class="team-details">
+              <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">${rec.division || '-'}</div></div>
+              <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">${prettyTimestamp(rec.timestamp)}</div></div>
+              <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value">${statusBadge(rec.cont || '-')}</div></div>
+              <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value">${statusBadge(rec.adoption || '-')}</div></div>
+              <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value">${statusBadge(rec.followup || '-')}</div></div>
+              ${rec.timeline ? `<div class="detail-row"><div class="detail-label">Timeline:</div><div class="detail-value">${rec.timeline}</div></div>` : ''}
+              ${rec.support ? `<div class="detail-row"><div class="detail-label">Support Needed:</div><div class="detail-value">${rec.support}</div></div>` : ''}
+            </div>
+          `;
+          teamGrid.appendChild(card);
+        });
+      }
+    
+      // 8) Hydrate tables
+      function fillTable(tableRootSelector, rowsData, columns) {
+        const table = document.querySelector(`${tableRootSelector} table tbody`);
+        if (!table) return;
+        table.innerHTML = '';
+        rowsData.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = columns.map(c => `<td>${c(row)}</td>`).join('');
+          table.appendChild(tr);
+        });
+      }
+    
+      // Experience & Challenges
+      fillTable(
+        '.comparison-table:nth-of-type(1)', // first comparison table in your markup
+        records,
+        [
+          r => `<strong>${r.team}</strong>`,
+          r => r.worked || '-',
+          r => r.challenge || '-',
+          r => r.improve || '-'
+        ]
+      );
+    
+      // Future Plans & Development
+      fillTable(
+        '.comparison-table:nth-of-type(2)',
+        records,
+        [
+          r => `<strong>${r.team}</strong>`,
+          r => r.vision || '-',
+          r => r.nextSteps || '-',
+          r => r.timeline || (lower(r.cont).startsWith('yes') ? 'TBD' : 'No timeline yet')
+        ]
+      );
+    
+      // Support Needs & Barriers
+      fillTable(
+        '.comparison-table:nth-of-type(3)',
+        records,
+        [
+          r => `<strong>${r.team}</strong>`,
+          r => r.support || '-',
+          r => r.barriers || '-'
+        ]
+      );
+    })();
     </script>
 </html>
