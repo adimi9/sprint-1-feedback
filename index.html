@@ -219,11 +219,8 @@
 <script>
 (function () {
   const CSV_URL = 'Sprint 1 Feedback Form-68b904bdfedea2208c5b26ab.csv';
-
-  // Expected header's first column label
   const HEADER_START = 'Response ID';
 
-  // Column mapping (unchanged)
   const COLS = {
     id: 'Response ID',
     ts: 'Timestamp',
@@ -243,7 +240,6 @@
     followup: 'Would you be interested in ongoing check-ins or follow-up sessions?'
   };
 
-  // Utilities from previous answer
   const el = (html) => { const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstChild; };
   const txt = (v) => (v == null ? '' : String(v).trim());
   const parseRating = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
@@ -253,12 +249,76 @@
     for (const [key, cls] of mapping) if (t.startsWith(key)) return cls;
     return 'status-unsure';
   };
+  const uniqNonEmpty = (arr) => [...new Set(arr.map(x => txt(x)).filter(Boolean))];
+
+  function groupByTeam(rows) {
+    const map = new Map();
+    for (const r of rows) {
+      const team = txt(r[COLS.team]) || 'Unknown Team';
+      if (!map.has(team)) map.set(team, []);
+      map.get(team).push(r);
+    }
+    return map;
+  }
+
+  function summarizeTeam(teamRows) {
+    const ratings = teamRows.map(r => parseRating(r[COLS.rating])).filter(n => n != null);
+    const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : null;
+    const ratingDist = [1,2,3,4,5].map(k => ({
+      value: k,
+      count: teamRows.filter(r => parseRating(r[COLS.rating]) === k).length
+    }));
+
+    const contCounts = {
+      yes: 0, maybe: 0, no: 0, unsure: 0
+    };
+    teamRows.forEach(r => {
+      const c = txt(r[COLS.continue]).toLowerCase();
+      if (c.startsWith('yes')) contCounts.yes++;
+      else if (c.startsWith('maybe')) contCounts.maybe++;
+      else if (c.startsWith('no')) contCounts.no++;
+      else contCounts.unsure++;
+    });
+
+    const adoptCounts = { beyond: 0, team: 0, some: 0, none: 0, unsure: 0 };
+    teamRows.forEach(r => {
+      const a = txt(r[COLS.adoption]).toLowerCase();
+      if (!a) { adoptCounts.unsure++; return; }
+      if (a.startsWith("i'll definitely use")) adoptCounts.beyond++;
+      else if (a.startsWith('my immediate team')) adoptCounts.team++;
+      else if (a.startsWith('some people')) adoptCounts.some++;
+      else if (a.startsWith('no one')) adoptCounts.none++;
+      else adoptCounts.unsure++;
+    });
+
+    const aggList = (key, maxItems = 6) => {
+      const vals = uniqNonEmpty(teamRows.flatMap(r => (txt(r[key]) || '').split('\n')));
+      return vals.slice(0, maxItems);
+    };
+
+    return {
+      avgRating: avg,
+      ratingDist,
+      size: teamRows.length,
+      contCounts,
+      adoptCounts,
+      agg: {
+        worked: aggList(COLS.worked),
+        challenge: aggList(COLS.challenge),
+        better: aggList(COLS.better),
+        vision: aggList(COLS.vision),
+        steps: aggList(COLS.steps),
+        timeline: uniqNonEmpty(teamRows.map(r => r[COLS.timeline])),
+        support: aggList(COLS.support),
+        barriers: aggList(COLS.barriers)
+      }
+    };
+  }
 
   function render(rows) {
-    // Keep only rows with a Response ID and Team
     rows = rows.filter(r => txt(r[COLS.id]) && txt(r[COLS.team]));
 
-    // Metrics
+    // Global metrics unchanged
     const ratings = rows.map(r => parseRating(r[COLS.rating])).filter(n => n != null);
     const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : null;
     const contYesMaybe = rows.filter(r => {
@@ -274,127 +334,177 @@
     }).length;
     const adoptionRate = rows.length ? Math.round((adoptionPos / rows.length) * 100) : null;
 
-    // Update metric cards
     document.getElementById('avg-rating').textContent = avg != null ? (Math.round(avg*10)/10).toFixed(1) : '-';
     document.getElementById('total-responses').textContent = rows.length;
     document.getElementById('continuation-rate').textContent = contRate != null ? `${contRate}%` : '-';
     document.getElementById('adoption-rate').textContent = adoptionRate != null ? `${adoptionRate}%` : '-';
 
-    // Team cards
+    // Group by team
+    const byTeam = groupByTeam(rows);
     const teamCards = document.getElementById('team-cards');
     teamCards.innerHTML = '';
-    rows.forEach(r => {
-      const team = txt(r[COLS.team]);
-      const division = txt(r[COLS.division]);
-      const ts = txt(r[COLS.ts]);
-      const rating = parseRating(r[COLS.rating]) ?? '-';
-      const cont = txt(r[COLS.continue]);
-      const adoption = txt(r[COLS.adoption]);
-      const follow = txt(r[COLS.followup]);
-      const timeline = txt(r[COLS.timeline]);
-      const support = txt(r[COLS.support]);
 
-      const contClass = statusBadge(cont, [
-        ['yes, definitely', 'status-yes'],
-        ['yes, but', 'status-yes'],
-        ['maybe', 'status-maybe'],
-        ['unsure', 'status-unsure'],
-        ['no', 'status-no'],
-      ]);
-      const adoptClass = statusBadge(adoption, [
-        ["i'll definitely use it", 'status-yes'],
-        ['some people', 'status-some'],
-        ['my immediate team', 'status-team'],
-        ['no one', 'status-no'],
-      ]);
-      const followClass = statusBadge(follow, [
-        ['yes', 'status-yes'],
-        ['maybe', 'status-maybe'],
-        ['no', 'status-no'],
-      ]);
-      const ratingClass = classifyRatingBadge(rating);
+    // Render one card per team with member count and intra-team differences
+    [...byTeam.entries()].sort((a,b) => a[0].localeCompare(b[0])).forEach(([teamName, teamRows]) => {
+      const s = summarizeTeam(teamRows);
+      const ratingClass = classifyRatingBadge(s.avgRating ?? 3);
+
+      // Build mini rating bars
+      const maxCount = Math.max(1, ...s.ratingDist.map(d => d.count));
+      const barsHtml = s.ratingDist.map(d => {
+        const width = Math.round((d.count / maxCount) * 100);
+        return `
+          <div style="display:flex; align-items:center; gap:8px; margin:2px 0;">
+            <div style="width:18px; text-align:right; font-weight:600;">${d.value}</div>
+            <div style="flex:1; height:10px; background:#edf2f7; border-radius:6px; overflow:hidden;">
+              <div style="width:${width}%; height:100%; background:${d.value>=4?'#48bb78':'#ed8936'};"></div>
+            </div>
+            <div style="width:28px; text-align:left; color:#4a5568; font-size:0.85rem;">${d.count}</div>
+          </div>
+        `;
+      }).join('');
+
+      const contHtml = `
+        <span class="status-badge ${s.contCounts.yes ? 'status-yes' : 'status-unsure'}">Yes: ${s.contCounts.yes}</span>
+        <span class="status-badge ${s.contCounts.maybe ? 'status-maybe' : 'status-unsure'}">Maybe: ${s.contCounts.maybe}</span>
+        <span class="status-badge ${s.contCounts.no ? 'status-no' : 'status-unsure'}">No: ${s.contCounts.no}</span>
+      `;
+
+      const adoptHtml = `
+        <span class="status-badge ${s.adoptCounts.beyond ? 'status-yes' : 'status-unsure'}">Beyond Me: ${s.adoptCounts.beyond}</span>
+        <span class="status-badge ${s.adoptCounts.team ? 'status-team' : 'status-unsure'}">My Team: ${s.adoptCounts.team}</span>
+        <span class="status-badge ${s.adoptCounts.some ? 'status-some' : 'status-unsure'}">Some People: ${s.adoptCounts.some}</span>
+        <span class="status-badge ${s.adoptCounts.none ? 'status-no' : 'status-unsure'}">No one: ${s.adoptCounts.none}</span>
+      `;
+
+      // Member-level collapsible list
+      const membersHtml = teamRows.map((r, idx) => {
+        const rid = txt(r[COLS.id]);
+        const rating = parseRating(r[COLS.rating]) ?? '-';
+        const cont = txt(r[COLS.continue]) || '-';
+        const worked = txt(r[COLS.worked]);
+        const challenge = txt(r[COLS.challenge]);
+        return `
+          <details style="background:#f8fafc; border-radius:10px; padding:10px 12px;">
+            <summary style="cursor:pointer; display:flex; gap:10px; align-items:center;">
+              <span style="font-weight:600; color:#2d3748;">Member ${idx+1}</span>
+              <span class="status-badge ${classifyRatingBadge(rating)}">${rating}/5</span>
+              <span class="status-badge ${statusBadge(cont, [['yes','status-yes'],['maybe','status-maybe'],['no','status-no']])}">${cont}</span>
+              <span style="color:#718096; font-size:0.8rem;">ID: ${rid}</span>
+            </summary>
+            <div style="margin-top:8px;">
+              ${worked ? `<div style="margin:6px 0;"><strong>Worked best:</strong><br>${worked.replaceAll('\n','<br/>')}</div>` : ''}
+              ${challenge ? `<div style="margin:6px 0;"><strong>Challenge:</strong><br>${challenge.replaceAll('\n','<br/>')}</div>` : ''}
+            </div>
+          </details>
+        `;
+      }).join('');
 
       const card = el(`
         <div class="team-card">
           <div class="team-header">
-            <div class="team-name">${team || '-'}</div>
-            <div class="rating-badge ${ratingClass}">${rating}/5</div>
+            <div class="team-name">${teamName}</div>
+            <div class="rating-badge ${ratingClass}">${s.avgRating != null ? (Math.round(s.avgRating*10)/10).toFixed(1) : '-'} / 5</div>
           </div>
-          <div class="response-id">Response ID: ${txt(r[COLS.id])}</div>
-          <div class="team-details">
-            <div class="detail-row"><div class="detail-label">Division:</div><div class="detail-value">${division || '-'}</div></div>
-            <div class="detail-row"><div class="detail-label">Timestamp:</div><div class="detail-value">${ts || '-'}</div></div>
-            <div class="detail-row"><div class="detail-label">Continue Beyond Sprint:</div><div class="detail-value"><span class="status-badge ${contClass}">${cont || '-'}</span></div></div>
-            <div class="detail-row"><div class="detail-label">Adoption Level:</div><div class="detail-value"><span class="status-badge ${adoptClass}">${adoption || '-'}</span></div></div>
-            <div class="detail-row"><div class="detail-label">Follow-up Interest:</div><div class="detail-value"><span class="status-badge ${followClass}">${follow || '-'}</span></div></div>
-            ${timeline ? `<div class="detail-row"><div class="detail-label">Timeline:</div><div class="detail-value">${timeline}</div></div>` : ''}
-            ${support ? `<div class="detail-row"><div class="detail-label">Support Needed:</div><div class="detail-value">${support}</div></div>` : ''}
+          <div class="team-details" style="margin-bottom:10px;">
+            <div class="detail-row">
+              <div class="detail-label">Members Responded:</div>
+              <div class="detail-value"><strong>${s.size}</strong></div>
+            </div>
+            <div class="detail-row" style="align-items:center;">
+              <div class="detail-label">Rating Distribution:</div>
+              <div class="detail-value">
+                ${barsHtml}
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Continue Beyond Sprint:</div>
+              <div class="detail-value" style="display:flex; gap:8px; flex-wrap:wrap;">${contHtml}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Adoption:</div>
+              <div class="detail-value" style="display:flex; gap:8px; flex-wrap:wrap;">${adoptHtml}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Distinct Themes (Worked Best):</div>
+              <div class="detail-value">
+                <ul style="padding-left:18px; color:#2d3748;">
+                  ${s.agg.worked.map(x => `<li>${x}</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Distinct Themes (Challenges):</div>
+              <div class="detail-value">
+                <ul style="padding-left:18px; color:#2d3748;">
+                  ${s.agg.challenge.map(x => `<li>${x}</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Members’ Responses:</div>
+              <div class="detail-value" style="display: grid; gap:8px;">
+                ${membersHtml}
+              </div>
+            </div>
           </div>
         </div>
       `);
       teamCards.appendChild(card);
     });
 
-    // Tables
+    // Aggregated tables (one row per team with merged distinct answers)
     const tbodyExp = document.getElementById('table-experience');
     const tbodyFuture = document.getElementById('table-future');
     const tbodySupport = document.getElementById('table-support');
 
-    tbodyExp.innerHTML = rows.map(r => `
+    const teamSummaries = [...byTeam.entries()]
+      .map(([team, teamRows]) => ({ team, rows: teamRows, summary: summarizeTeam(teamRows) }))
+      .sort((a,b) => a.team.localeCompare(b.team));
+
+    tbodyExp.innerHTML = teamSummaries.map(({team, summary}) => `
       <tr>
-        <td><strong>${txt(r[COLS.team])}</strong></td>
-        <td>${txt(r[COLS.worked]).replaceAll('\n','<br/>')}</td>
-        <td>${txt(r[COLS.challenge]).replaceAll('\n','<br/>')}</td>
-        <td>${txt(r[COLS.better]).replaceAll('\n','<br/>')}</td>
+        <td><strong>${team}</strong><br/><span style="color:#718096; font-size:0.85rem;">n=${summary.size}</span></td>
+        <td><ul style="padding-left:18px;">${summary.agg.worked.map(x => `<li>${x}</li>`).join('')}</ul></td>
+        <td><ul style="padding-left:18px;">${summary.agg.challenge.map(x => `<li>${x}</li>`).join('')}</ul></td>
+        <td><ul style="padding-left:18px;">${summary.agg.better.map(x => `<li>${x}</li>`).join('')}</ul></td>
       </tr>
     `).join('');
 
-    tbodyFuture.innerHTML = rows.map(r => `
+    tbodyFuture.innerHTML = teamSummaries.map(({team, summary}) => `
       <tr>
-        <td><strong>${txt(r[COLS.team])}</strong></td>
-        <td>${txt(r[COLS.vision]).replaceAll('\n','<br/>')}</td>
-        <td>${txt(r[COLS.steps]).replaceAll('\n','<br/>')}</td>
-        <td>${txt(r[COLS.timeline])}</td>
+        <td><strong>${team}</strong><br/><span style="color:#718096; font-size:0.85rem;">n=${summary.size}</span></td>
+        <td><ul style="padding-left:18px;">${summary.agg.vision.map(x => `<li>${x}</li>`).join('')}</ul></td>
+        <td><ul style="padding-left:18px;">${summary.agg.steps.map(x => `<li>${x}</li>`).join('')}</ul></td>
+        <td>${summary.agg.timeline.join('<br/>')}</td>
       </tr>
     `).join('');
 
-    tbodySupport.innerHTML = rows.map(r => `
+    tbodySupport.innerHTML = teamSummaries.map(({team, summary}) => `
       <tr>
-        <td><strong>${txt(r[COLS.team])}</strong></td>
-        <td>${txt(r[COLS.support])}</td>
-        <td>${txt(r[COLS.barriers])}</td>
+        <td><strong>${team}</strong><br/><span style="color:#718096; font-size:0.85rem;">n=${summary.size}</span></td>
+        <td><ul style="padding-left:18px;">${summary.agg.support.map(x => `<li>${x}</li>`).join('')}</ul></td>
+        <td><ul style="padding-left:18px;">${summary.agg.barriers.map(x => `<li>${x}</li>`).join('')}</ul></td>
       </tr>
     `).join('');
   }
 
-  // Load as raw text first, to detect header row
   fetch(CSV_URL)
     .then(resp => {
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       return resp.text();
     })
     .then(text => {
-      // Find the real header line index
       const lines = text.split(/\r?\n/);
       const headerIdx = lines.findIndex(l => l.split(',')[0].trim() === HEADER_START);
-
-      if (headerIdx === -1) {
-        throw new Error('Could not locate header row starting with "Response ID".');
-      }
-
-      // Rebuild CSV starting from the header row
+      if (headerIdx === -1) throw new Error('Could not locate header row starting with "Response ID".');
       const trimmed = lines.slice(headerIdx).join('\n');
 
       Papa.parse(trimmed, {
         header: true,
         skipEmptyLines: true,
-        complete: (results) => {
-          render(results.data);
-        },
-        error: (err) => {
-          console.error('CSV parse error:', err);
-          alert('Failed to parse CSV. See console for details.');
-        }
+        complete: (results) => render(results.data),
+        error: (err) => { console.error('CSV parse error:', err); alert('Failed to parse CSV. See console for details.'); }
       });
     })
     .catch(err => {
