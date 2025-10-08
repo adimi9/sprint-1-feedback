@@ -56,6 +56,17 @@
       margin-bottom: 28px;
       flex-wrap: wrap;
     }
+
+    .tab-nav select.tab-btn {
+      appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, #9ca3af 50%), linear-gradient(135deg, #9ca3af 50%, transparent 50%), linear-gradient(to right, #e5e7eb, #e5e7eb);
+      background-position: calc(100% - 18px) calc(1.1em), calc(100% - 13px) calc(1.1em), calc(100% - 2.6em) 0.4em;
+      background-size: 6px 6px, 6px 6px, 1px 1.6em;
+      background-repeat: no-repeat;
+      padding-right: 2.8em;
+    }
+
+    
     .tab-btn {
       background: white;
       border: 2px solid #e5e7eb;
@@ -250,6 +261,16 @@
       <button class="tab-btn" onclick="switchTab('support')">🤝 Support Needs & Barriers</button>
     </div>
 
+    <!-- Filters -->
+    <div id="filters" class="tab-nav" style="margin-bottom: 12px;">
+      <select id="filter-division" class="tab-btn" style="cursor: default;">
+        <option value="">All Divisions</option>
+      </select>
+      <select id="filter-problem" class="tab-btn" style="cursor: default;">
+        <option value="">All Problems</option>
+      </select>
+    </div>
+
     <!-- Tab: Team Overview -->
     <div id="tab-overview" class="tab-content active">
       <div class="section">
@@ -439,32 +460,119 @@ function switchTab(tabName) {
     return `<div class="problem-pill" style="margin-top:6px;">${problem}</div>`;
   }
 
+  // Global state for filters
+  let RAW_ROWS = [];
+  let CURRENT_DIVISION = '';
+  let CURRENT_PROBLEM = '';
+
+  function getTeamDivision(teamRows) {
+    return txt(teamRows[0]?.[COLS.division]) || '—';
+  }
+  function getTeamProblem(teamName) {
+    return TEAM_PROBLEM.get(teamName) || '—';
+  }
+
+  // Apply filters and return filtered rows
+  function filterRows(rows) {
+    if (!CURRENT_DIVISION && !CURRENT_PROBLEM) return rows;
+    return rows.filter(r => {
+      const divOk = CURRENT_DIVISION ? txt(r[COLS.division]) === CURRENT_DIVISION : true;
+      const teamName = txt(r[COLS.team]) || 'Unknown Team';
+      const probOk = CURRENT_PROBLEM ? getTeamProblem(teamName) === CURRENT_PROBLEM : true;
+      return divOk && probOk;
+    });
+  }
+
+  // Sort teams by Division -> Problem -> Team
+  function sortTeamEntries(byTeam) {
+    return [...byTeam.entries()].sort((a, b) => {
+      const [teamA, rowsA] = a;
+      const [teamB, rowsB] = b;
+      const divA = getTeamDivision(rowsA);
+      const divB = getTeamDivision(rowsB);
+      if (divA !== divB) return divA.localeCompare(divB);
+      const probA = getTeamProblem(teamA);
+      const probB = getTeamProblem(teamB);
+      if (probA !== probB) return probA.localeCompare(probB);
+      return teamA.localeCompare(teamB);
+    });
+  }
+
+  // Populate filters based on data
+  function populateFilters(rows) {
+    const selDiv = document.getElementById('filter-division');
+    const selProb = document.getElementById('filter-problem');
+
+    // Divisions from raw rows
+    const divisions = Array.from(new Set(rows.map(r => txt(r[COLS.division])).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+
+    // Problems from TEAM_PROBLEM mapping (only for teams present in data)
+    const presentTeams = new Set(rows.map(r => txt(r[COLS.team])).filter(Boolean));
+    const problems = Array.from(new Set(
+      [...presentTeams].map(t => TEAM_PROBLEM.get(t) || '—')
+    )).sort((a,b)=>a.localeCompare(b));
+
+    // Clear and add options (keeping "All" on top)
+    function setOptions(selectEl, options) {
+      const current = selectEl.value;
+      selectEl.innerHTML = ''; // reset
+      const allOption = document.createElement('option');
+      allOption.value = '';
+      allOption.textContent = selectEl.id === 'filter-division' ? 'All Divisions' : 'All Problems';
+      selectEl.appendChild(allOption);
+      options.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o;
+        opt.textContent = o;
+        selectEl.appendChild(opt);
+      });
+      // Preserve selection if still valid
+      const wanted = (selectEl.id === 'filter-division' ? CURRENT_DIVISION : CURRENT_PROBLEM);
+      if (wanted && options.includes(wanted)) selectEl.value = wanted;
+      else selectEl.value = '';
+    }
+
+    setOptions(selDiv, divisions);
+    setOptions(selProb, problems);
+  }
+
   function render(rows) {
     // Keep only valid rows
     rows = rows.filter(r => txt(r[COLS.id]) && txt(r[COLS.team]));
 
+    // Save raw rows first time and whenever parsing completes
+    RAW_ROWS = rows;
+
+    // Populate filter select options from full data set
+    populateFilters(RAW_ROWS);
+
+    // Apply filters for displayed set
+    const filtered = filterRows(RAW_ROWS);
+
     // Metrics
-    const ratings = rows.map(r => parseRating(r[COLS.rating])).filter(n => n != null);
+    const ratings = filtered.map(r => parseRating(r[COLS.rating])).filter(n => n != null);
     const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : null;
-    const contYes = rows.filter(r => txt(r[COLS.continue]).toLowerCase().startsWith('yes')).length;
-    const contRate = rows.length ? Math.round((contYes / rows.length) * 100) : null;
-    const adoptionPos = rows.filter(r => {
+    const contYes = filtered.filter(r => txt(r[COLS.continue]).toLowerCase().startsWith('yes')).length;
+    const contRate = filtered.length ? Math.round((contYes / filtered.length) * 100) : null;
+    const adoptionPos = filtered.filter(r => {
       const a = txt(r[COLS.adoption]).toLowerCase();
       return a.startsWith('some people beyond') || a.startsWith('my division loves');
     }).length;
-    const adoptionRate = rows.length ? Math.round((adoptionPos / rows.length) * 100) : null;
+    const adoptionRate = filtered.length ? Math.round((adoptionPos / filtered.length) * 100) : null;
 
     document.getElementById('avg-rating').textContent = avg != null ? (Math.round(avg*10)/10).toFixed(1) : '-';
-    document.getElementById('total-responses').textContent = rows.length;
+    document.getElementById('total-responses').textContent = filtered.length;
     document.getElementById('continuation-rate').textContent = contRate != null ? `${contRate}%` : '-';
     document.getElementById('adoption-rate').textContent = adoptionRate != null ? `${adoptionRate}%` : '-';
 
     // Team Overview cards
-    const byTeam = groupByTeam(rows);
+    const byTeam = groupByTeam(filtered);
     const teamCards = document.getElementById('team-cards');
     teamCards.innerHTML = '';
 
-    [...byTeam.entries()].sort((a,b) => a[0].localeCompare(b[0])).forEach(([teamName, teamRows]) => {
+    const sortedTeams = sortTeamEntries(byTeam);
+
+    sortedTeams.forEach(([teamName, teamRows]) => {
       const teamTotal = TEAM_HEADCOUNT.get(teamName);
       const responded = `${teamRows.length}${teamTotal ? ` / ${teamTotal}` : ''}`;
 
@@ -546,7 +654,8 @@ function switchTab(tabName) {
     const tbodyExp = document.getElementById('table-experience');
     const tbodyFuture = document.getElementById('table-future');
     const tbodySupport = document.getElementById('table-support');
-    const teamEntries = [...byTeam.entries()].sort((a,b) => a[0].localeCompare(b[0]));
+
+    const sortedEntries = sortedTeams; // already sorted array of [team, rows]
 
     function groupAnswersWithMembers(teamRows, key) {
       const items = [];
@@ -596,7 +705,7 @@ function switchTab(tabName) {
       `;
     }
 
-    tbodyExp.innerHTML = teamEntries.map(([team, teamRows]) => `
+    tbodyExp.innerHTML = sortedEntries.map(([team, teamRows]) => `
       <tr>
         <td>${teamMetaCell(team, teamRows)}</td>
         <td>${renderAnswerCell(teamRows, COLS.worked)}</td>
@@ -605,7 +714,7 @@ function switchTab(tabName) {
       </tr>
     `).join('');
 
-    tbodyFuture.innerHTML = teamEntries.map(([team, teamRows]) => `
+    tbodyFuture.innerHTML = sortedEntries.map(([team, teamRows]) => `
       <tr>
         <td>${teamMetaCell(team, teamRows)}</td>
         <td>${renderAnswerCell(teamRows, COLS.vision)}</td>
@@ -614,13 +723,29 @@ function switchTab(tabName) {
       </tr>
     `).join('');
 
-    tbodySupport.innerHTML = teamEntries.map(([team, teamRows]) => `
+    tbodySupport.innerHTML = sortedEntries.map(([team, teamRows]) => `
       <tr>
         <td>${teamMetaCell(team, teamRows)}</td>
         <td>${renderAnswerCell(teamRows, COLS.support)}</td>
         <td>${renderAnswerCell(teamRows, COLS.barriers)}</td>
       </tr>
     `).join('');
+  }
+
+  // Reload render when filters change
+  function wireFilterEvents() {
+    const selDiv = document.getElementById('filter-division');
+    const selProb = document.getElementById('filter-problem');
+
+    selDiv.addEventListener('change', () => {
+      CURRENT_DIVISION = selDiv.value;
+      // Optionally, constrain Problem options to those present within selected Division
+      render(RAW_ROWS);
+    });
+    selProb.addEventListener('change', () => {
+      CURRENT_PROBLEM = selProb.value;
+      render(RAW_ROWS);
+    });
   }
 
   // Load CSV (trim any preface before header)
@@ -634,7 +759,10 @@ function switchTab(tabName) {
       Papa.parse(trimmed, {
         header: true,
         skipEmptyLines: true,
-        complete: (results) => render(results.data),
+        complete: (results) => {
+          wireFilterEvents();
+          render(results.data);
+        },
         error: (err) => { console.error('CSV parse error:', err); alert('Failed to parse CSV.'); }
       });
     })
