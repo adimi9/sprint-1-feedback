@@ -284,7 +284,7 @@
   function pillClassForContinue(value) {
     const v = txt(value).toLowerCase();
     if (v.startsWith('yes')) return 'pill-green';
-    if (v.startsWith('maybe')) return 'pill-amber';
+    if (v.startsWith('maybe') || v.startsWith('unsure')) return 'pill-amber';
     if (v.startsWith('no')) return 'pill-red';
     return 'pill-soft';
     }
@@ -352,8 +352,7 @@
           const color = memberColor(idx);
           const rid = txt(r[COLS.id]);
           return `
-            <span class="mchip-card pill ${pillClassFn(val)}" title="ID: ${rid}">
-              
+            <span class="mchip-card pill ${pillClassFn(val)}" title="ID: ${rid}">      
               <span>#${idx+1}</span>
               <span>${display}</span>
             </span>
