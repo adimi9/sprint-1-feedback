@@ -172,8 +172,6 @@
     .pill-rating-3 { background:#f59e0b; color:#fff; border-color:#f59e0b; }
     .pill-soft { background:#fef3c7; color:#92400e; border-color:#fde68a; }
 
-    
-  
     /* Member tag for TEAM CARDS - no dots, cleaner look */
     .mchip-card {
       display:inline-flex; align-items:center; gap:4px; padding:3px 7px;
@@ -188,34 +186,6 @@
       border: 1px solid rgba(0,0,0,0.06);
     }
     .mchip .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
-
-    /* Circular index badge (neutral, visible on all backgrounds) */
-.idx-circle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: #1f2937;            /* slate-800 */
-  background: #eef2ff;       /* indigo-50 */
-  border: 1px solid #c7d2fe; /* indigo-200 */
-}
-
-/* Slightly tighter chip layout so circle feels balanced */
-.mchip-card, .mchip {
-  gap: 6px;
-  padding: 4px 8px;
-}
-
-/* Tiny separator dot for rhythm */
-.mchip-card .sep, .mchip .sep {
-  width: 4px; height: 4px; border-radius: 50%;
-  background: rgba(0,0,0,0.12);
-  display: inline-block;
-}
 
     /* Tables (kept from previous, slightly compact) */
     .comparison-table {
@@ -470,12 +440,12 @@ function switchTab(tabName) {
           const display = valueTransform(val);
           const color = memberColor(idx);
           const rid = txt(r[COLS.id]);
-         return `
-  <span class="mchip-card pill ${pillClassFn(val)}" title="ID: ${rid}">
-    <span class="idx-circle">${idx+1}</span></span>
-    <span>${display}</span>
-  </span>
-`;
+          return `
+            <span class="mchip-card pill ${pillClassFn(val)}" title="ID: ${rid}">  
+              <span>#${idx+1}</span>
+              <span>${display}</span>
+            </span>
+          `;
         }).filter(Boolean).join('');
       }
 
@@ -512,11 +482,12 @@ function switchTab(tabName) {
         const color = memberColor(idx);
         const rid = txt(r[COLS.id]);
         return `
-  <span class="mchip-card pill ${pillClassForRating(n)}" title="ID: ${rid}">
-    <span class="idx-circle">${idx+1}</span></span>
-    <span>${n.toFixed(1)}</span>
-  </span>
-`;
+          <span class="mchip-card pill ${pillClassForRating(n)}" title="ID: ${rid}">
+            <span class="dot" style="background:${color};"></span>
+            <span>#${idx+1}</span>
+            <span>${n.toFixed(1)}</span>
+          </span>
+        `;
       }).join('');
 
       const continuePills = buildMemberPills(COLS.continue, pillClassForContinue);
@@ -586,10 +557,7 @@ function switchTab(tabName) {
       return teamRows.map((r, idx) => {
         const color = memberColor(idx);
         const rid = txt(r[COLS.id]);
-        return `<span title="ID ${rid}" class="mchip" style="background:#fff;">
-  <span class="idx-circle">${idx+1}</span></span>
-  <span class="dot" style="background:${color};"></span>
-</span>`;
+        return `<span title="ID ${rid}" class="mchip" style="background:#fff;"><span class="dot" style="background:${color};"></span>#${idx+1}</span>`;
       }).join('');
     }
 
@@ -598,10 +566,7 @@ function switchTab(tabName) {
       return [...grouped.entries()].map(([answer, members]) => {
         const chips = members.map(({idx, id}) => {
           const color = memberColor(idx);
-          return `<span class="mchip" title="ID: ${id}">
-  <span class="idx-circle">${idx+1}</span></span>
-  <span class="dot" style="background:${color};"></span>
-</span>`;
+          return `<span class="mchip" title="ID: ${id}"><span class="dot" style="background:${color};"></span>#${idx+1}</span>`;
         }).join('');
         return `<div class="answer-block"><div class="text">${answer}</div><div>${chips}</div></div>`;
       }).join('');
