@@ -244,11 +244,12 @@
 
 <script>
 (function () {
-  // 1) Configure your CSV source
-  // If running locally, consider a simple static server (e.g., `python -m http.server`) to avoid CORS issues.
-  const CSV_URL = 'Sprint 1 Feedback Form-68b904bdfedea2208c5b26ab.csv'; // or a full URL if hosted
+  const CSV_URL = 'feedback.csv';
 
-  // 2) Column name mapping (exactly as in your CSV header)
+  // Expected header's first column label
+  const HEADER_START = 'Response ID';
+
+  // Column mapping (unchanged)
   const COLS = {
     id: 'Response ID',
     ts: 'Timestamp',
@@ -268,54 +269,34 @@
     followup: 'Would you be interested in ongoing check-ins or follow-up sessions?'
   };
 
-  // 3) Utilities
-  const el = (html) => {
-    const t = document.createElement('template');
-    t.innerHTML = html.trim();
-    return t.content.firstChild;
-  };
+  // Utilities from previous answer
+  const el = (html) => { const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstChild; };
   const txt = (v) => (v == null ? '' : String(v).trim());
-  const parseRating = (v) => {
-    const n = Number(v);
-    return Number.isFinite(n) ? n : null;
-  };
-  const classifyRatingBadge = (r) => {
-    if (r >= 5) return 'rating-5';
-    if (r >= 4) return 'rating-4';
-    if (r >= 3) return 'rating-3';
-    return 'rating-3';
-  };
+  const parseRating = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+  const classifyRatingBadge = (r) => r >= 5 ? 'rating-5' : r >= 4 ? 'rating-4' : 'rating-3';
   const statusBadge = (value, mapping) => {
     const t = txt(value).toLowerCase();
-    for (const [key, cls] of mapping) {
-      if (t.startsWith(key)) return cls;
-    }
+    for (const [key, cls] of mapping) if (t.startsWith(key)) return cls;
     return 'status-unsure';
   };
 
-  // 4) Main render
-  function render(dataRows) {
-    // Filter out blank/meta rows (some CSV exports include top meta lines)
-    // Heuristic: keep rows that have a Response ID and a non-empty Team
-    const rows = dataRows.filter(r => txt(r[COLS.id]) && txt(r[COLS.team]));
+  function render(rows) {
+    // Keep only rows with a Response ID and Team
+    rows = rows.filter(r => txt(r[COLS.id]) && txt(r[COLS.team]));
 
-    // Compute metrics
+    // Metrics
     const ratings = rows.map(r => parseRating(r[COLS.rating])).filter(n => n != null);
     const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : null;
-
-    // Continuation: count Yes or Maybe
     const contYesMaybe = rows.filter(r => {
       const c = txt(r[COLS.continue]).toLowerCase();
       return c.startsWith('yes') || c.startsWith('maybe');
     }).length;
     const contRate = rows.length ? Math.round((contYesMaybe / rows.length) * 100) : null;
 
-    // Adoption: count any that indicate team/beyond-team (exclude "no one" and blanks)
     const adoptionPos = rows.filter(r => {
       const a = txt(r[COLS.adoption]).toLowerCase();
-      if (!a) return false;
-      if (a.startsWith('no one')) return false;
-      return true; // counts "my immediate team", "i'll definitely use it", "some people beyond my immediate team", etc.
+      if (!a || a.startsWith('no one')) return false;
+      return true;
     }).length;
     const adoptionRate = rows.length ? Math.round((adoptionPos / rows.length) * 100) : null;
 
@@ -357,7 +338,6 @@
         ['maybe', 'status-maybe'],
         ['no', 'status-no'],
       ]);
-
       const ratingClass = classifyRatingBadge(rating);
 
       const card = el(`
@@ -413,30 +393,40 @@
     `).join('');
   }
 
-  // 5) Load CSV via Papa Parse
-  Papa.parse(CSV_URL, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: (results) => {
-      // Some exports include meta rows above the real header — if so,
-      // verify we have expected columns; if not, try to detect the real header row.
-      const rows = results.data;
+  // Load as raw text first, to detect header row
+  fetch(CSV_URL)
+    .then(resp => {
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      return resp.text();
+    })
+    .then(text => {
+      // Find the real header line index
+      const lines = text.split(/\r?\n/);
+      const headerIdx = lines.findIndex(l => l.split(',')[0].trim() === HEADER_START);
 
-      // If you notice top meta rows (e.g., "Expected total responses"), auto-trim:
-      const hasTeamKey = rows.length && (('Which Sprint team are you from?' in rows[0]) || ('Which Sprint team are you from?' in rows.find(()=>true) || false));
-      if (!hasTeamKey) {
-        // Soft-fail: still render whatever we can
-        console.warn('CSV headers not matched. Verify header row in CSV.');
+      if (headerIdx === -1) {
+        throw new Error('Could not locate header row starting with "Response ID".');
       }
 
-      render(rows);
-    },
-    error: (err) => {
-      console.error('CSV parse error:', err);
-      alert('Failed to load CSV. Check the file path or server settings.');
-    }
-  });
+      // Rebuild CSV starting from the header row
+      const trimmed = lines.slice(headerIdx).join('\n');
+
+      Papa.parse(trimmed, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          render(results.data);
+        },
+        error: (err) => {
+          console.error('CSV parse error:', err);
+          alert('Failed to parse CSV. See console for details.');
+        }
+      });
+    })
+    .catch(err => {
+      console.error('CSV load error:', err);
+      alert('Failed to load CSV. Check path/CORS or header detection.');
+    });
 })();
 </script>
 </body>
