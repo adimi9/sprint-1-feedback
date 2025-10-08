@@ -158,7 +158,7 @@
     /* Pills: not bold text inside */
     .pill {
       display: inline-flex; align-items: center; gap: 6px;
-      padding: 4px 8px; border-radius: 999px; font-weight: 600; /* headings are bold; pills slightly lighter */
+      padding: 4px 8px; border-radius: 999px; font-weight: 600;
       font-size: 0.82rem;
       border: 1px solid #E5E7EB; background: #F8FAFC; color: #111827;
     }
@@ -179,13 +179,12 @@
       border: 1px solid rgba(0,0,0,0.06);
     }
 
-    /* Member tag (index + color) - for TABLES with dots */
+    /* Member tag (index + color) - for TABLES with colored background */
     .mchip {
-      display:inline-flex; align-items:center; gap:6px; padding:3px 7px;
-      border-radius:12px; font-size:0.78rem; color:#0f172a;
-      border: 1px solid rgba(0,0,0,0.06);
+      display:inline-flex; align-items:center; gap:4px; padding:4px 8px;
+      border-radius:12px; font-size:0.78rem; font-weight: 600;
+      border: 1px solid rgba(0,0,0,0.1);
     }
-    .mchip .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
 
     /* Tables (kept from previous, slightly compact) */
     .comparison-table {
@@ -350,7 +349,7 @@ function switchTab(tabName) {
   const txt = (v) => (v == null ? '' : String(v).trim());
   const parseRating = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
 
-  // Palette for member dots
+  // Palette for member colors
   const MEMBER_COLORS = [
     '#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9',
     '#BBDEFB', '#B3E5FC', '#B2EBF2', '#B2DFDB', '#C8E6C9',
@@ -370,13 +369,23 @@ function switchTab(tabName) {
 
   function memberColor(idx) { return MEMBER_COLORS[idx % MEMBER_COLORS.length]; }
 
+  // Helper to get text color based on background brightness
+  function getTextColor(bgColor) {
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 155 ? '#0f172a' : '#ffffff';
+  }
+
   function pillClassForContinue(value) {
     const v = txt(value).toLowerCase();
     if (v.startsWith('yes')) return 'pill-green';
     if (v.startsWith('maybe')) return 'pill-amber';
     if (v.startsWith('no')) return 'pill-red';
     return 'pill-soft';
-    }
+  }
   function pillClassForAdoption(value) {
     const v = txt(value).toLowerCase();
     if (!v) return 'pill-soft';
@@ -414,7 +423,7 @@ function switchTab(tabName) {
 
     const adoptionPos = rows.filter(r => {
       const a = txt(r[COLS.adoption]).toLowerCase();
-      return a.startsWith('some people beyond') || a.startsWith('my division loves'); /* dream big */
+      return a.startsWith('some people beyond') || a.startsWith('my division loves');
     }).length;
     const adoptionRate = rows.length ? Math.round((adoptionPos / rows.length) * 100) : null;
 
@@ -449,32 +458,6 @@ function switchTab(tabName) {
         }).filter(Boolean).join('');
       }
 
-      // Timestamp pills (formatted)
-      function fmtTs(s) {
-        const raw = txt(s);
-        if (!raw) return '';
-        // keep your provided format; if parseable, render weekday prefix
-        try {
-          const d = new Date(raw.replace(' AM',' AM').replace(' PM',' PM'));
-          if (!isNaN(d.getTime())) {
-            return d.toLocaleString('en-SG', { weekday:'short', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true });
-          }
-        } catch {}
-        return raw; // fallback
-      }
-
-      const tsPills = teamRows.map((r, idx) => {
-        const color = memberColor(idx);
-        const rid = txt(r[COLS.id]);
-        return `
-          <span class="mchip pill pill-soft" title="ID: ${rid}">
-            <span class="dot" style="background:${color};"></span>
-            <span>#${idx+1}</span>
-            <span>${fmtTs(r[COLS.ts])}</span>
-          </span>
-        `;
-      }).join('');
-
       // Rating pills
       const ratingPills = teamRows.map((r, idx) => {
         const n = parseRating(r[COLS.rating]);
@@ -483,7 +466,6 @@ function switchTab(tabName) {
         const rid = txt(r[COLS.id]);
         return `
           <span class="mchip-card pill ${pillClassForRating(n)}" title="ID: ${rid}">
-            <span class="dot" style="background:${color};"></span>
             <span>#${idx+1}</span>
             <span>${n.toFixed(1)}</span>
           </span>
@@ -530,7 +512,7 @@ function switchTab(tabName) {
       teamCards.appendChild(card);
     });
 
-    // Tables (reuse compact grouped answers for richer context)
+    // Tables with colored member chips
     const tbodyExp = document.getElementById('table-experience');
     const tbodyFuture = document.getElementById('table-future');
     const tbodySupport = document.getElementById('table-support');
@@ -556,9 +538,10 @@ function switchTab(tabName) {
     function respondentLegend(teamRows) {
       return teamRows.map((r, idx) => {
         const color = memberColor(idx);
+        const textColor = getTextColor(color);
         const rid = txt(r[COLS.id]);
-        return `<span title="ID ${rid}" class="mchip" style="background:#fff;"><span class="dot" style="background:${color};"></span>#${idx+1}</span>`;
-      }).join('');
+        return `<span title="ID ${rid}" class="mchip" style="background:${color}; color:${textColor};">#${idx+1}</span>`;
+      }).join(' ');
     }
 
     function renderAnswerCell(teamRows, key) {
@@ -566,9 +549,10 @@ function switchTab(tabName) {
       return [...grouped.entries()].map(([answer, members]) => {
         const chips = members.map(({idx, id}) => {
           const color = memberColor(idx);
-          return `<span class="mchip" title="ID: ${id}"><span class="dot" style="background:${color};"></span>#${idx+1}</span>`;
-        }).join('');
-        return `<div class="answer-block"><div class="text">${answer}</div><div>${chips}</div></div>`;
+          const textColor = getTextColor(color);
+          return `<span class="mchip" title="ID: ${id}" style="background:${color}; color:${textColor};">#${idx+1}</span>`;
+        }).join(' ');
+        return `<div class="answer-block"><div class="text">${answer}</div><div style="margin-top:4px;">${chips}</div></div>`;
       }).join('');
     }
 
@@ -577,7 +561,7 @@ function switchTab(tabName) {
         <td>
           <strong>${team}</strong><br/>
           <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
-          <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
+          <div style="margin-top:6px;">${respondentLegend(teamRows)}</div>
         </td>
         <td>${renderAnswerCell(teamRows, COLS.worked)}</td>
         <td>${renderAnswerCell(teamRows, COLS.challenge)}</td>
@@ -590,7 +574,7 @@ function switchTab(tabName) {
         <td>
           <strong>${team}</strong><br/>
           <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
-          <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
+          <div style="margin-top:6px;">${respondentLegend(teamRows)}</div>
         </td>
         <td>${renderAnswerCell(teamRows, COLS.vision)}</td>
         <td>${renderAnswerCell(teamRows, COLS.steps)}</td>
@@ -603,7 +587,7 @@ function switchTab(tabName) {
         <td>
           <strong>${team}</strong><br/>
           <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
-          <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
+          <div style="margin-top:6px;">${respondentLegend(teamRows)}</div>
         </td>
         <td>${renderAnswerCell(teamRows, COLS.support)}</td>
         <td>${renderAnswerCell(teamRows, COLS.barriers)}</td>
