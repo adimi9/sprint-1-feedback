@@ -190,7 +190,7 @@
     <div class="metrics-grid">
       <div class="metric-card"><div class="metric-value" id="avg-rating">-</div><div class="metric-label">Average Rating</div></div>
       <div class="metric-card"><div class="metric-value" id="total-responses">-</div><div class="metric-label">Total Responses</div></div>
-      <div class="metric-card"><div class="metric-value" id="continuation-rate">-</div><div class="metric-label">Continuation Rate (Yes/Maybe)</div></div>
+      <div class="metric-card"><div class="metric-value" id="continuation-rate">-</div><div class="metric-label">Continuation Rate (Yes/)</div></div>
       <div class="metric-card"><div class="metric-value" id="adoption-rate">-</div><div class="metric-label">Team/Beyond Team Adoption</div></div>
     </div>
 
@@ -303,7 +303,7 @@
     if (v === 'yes') return 'pill-green';
     if (v === 'maybe') return 'pill-amber';
     if (v === 'no') return 'pill-red';
-    return 'pill-soft';
+    return 'pill-teal';
   }
   function pillClassForRating(n) {
     if (n >= 5) return 'pill-rating-5';
