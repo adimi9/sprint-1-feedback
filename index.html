@@ -28,11 +28,8 @@
       text-align: center;
       color: white;
     }
-    .header h1 {
-      font-size: 2.1rem; font-weight: 800; margin-bottom: 6px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.12);
-    }
-    .header p { font-size: 1rem; opacity: 0.95; }
+    .header h1 { font-size: 2rem; font-weight: 800; margin-bottom: 6px; }
+    .header p { font-size: 0.95rem; opacity: 0.95; }
     .content { padding: 22px; }
 
     /* Metrics */
@@ -50,7 +47,7 @@
 
     .section { margin-bottom: 28px; }
     .section-title {
-      font-size: 1.4rem; font-weight: 800; margin-bottom: 12px; color: #111827;
+      font-size: 1.25rem; font-weight: 800; margin-bottom: 12px; color: #111827;
       border-left: 4px solid #4facfe; padding-left: 10px;
     }
 
@@ -72,14 +69,14 @@
       display: grid;
       grid-template-rows: auto 1fr;
       padding: 14px;
-      height: 360px;            /* square-like on desktop */
+      height: 360px;         /* square-like on desktop */
       overflow: hidden;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .team-card:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,0.08); }
     @media (max-width: 768px) { .team-card { height: auto; } }
 
-    /* Header: title + division pill, and responded info below title */
+    /* Header */
     .team-header {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -88,9 +85,7 @@
       border-bottom: 1px solid #f1f5f9;
       margin-bottom: 10px;
     }
-    .team-title {
-      display: flex; flex-direction: column;
-    }
+    .team-title { display: flex; flex-direction: column; }
     .team-name { font-weight: 900; color: #0f172a; font-size: 1.05rem; line-height: 1.1; }
     .responded-note { color: #6b7280; font-size: 0.84rem; margin-top: 2px; }
     .division-pill {
@@ -100,30 +95,27 @@
       border: 1px solid #cfe0ff;
     }
 
-    /* Content stack underneath header */
+    /* Single column stack */
     .stack {
       display: grid;
-      gap: 10px;
+      gap: 12px;
       min-height: 0;
-      overflow: auto; /* scroll if long so card stays square */
-      padding-right: 2px; /* prevent scroll bar overlay */
+      overflow: auto; /* scroll inside on desktop */
+      padding-right: 2px;
     }
     .row {
-      display: grid;
-      grid-template-columns: 160px 1fr;
-      gap: 8px;
-      align-items: start;
+      display: block;
     }
-    .label { color:#64748b; font-weight: 800; font-size: 0.9rem; padding-top: 4px; }
+    .label { color:#1f2937; font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; }
     .pill-group { display:flex; flex-wrap: wrap; gap: 6px; }
 
-    /* Pills */
+    /* Pills: not bold text inside */
     .pill {
       display: inline-flex; align-items: center; gap: 6px;
-      padding: 4px 8px; border-radius: 999px; font-weight: 700; font-size: 0.82rem;
+      padding: 4px 8px; border-radius: 999px; font-weight: 600; /* headings are bold; pills slightly lighter */
+      font-size: 0.82rem;
       border: 1px solid #E5E7EB; background: #F8FAFC; color: #111827;
     }
-    .pill-soft { background:#f3f4f6; }
     .pill-green { background:#dcfce7; color:#166534; border-color:#bbf7d0; }
     .pill-amber { background:#fef3c7; color:#92400e; border-color:#fde68a; }
     .pill-red { background:#fee2e2; color:#991b1b; border-color:#fecaca; }
@@ -133,15 +125,7 @@
     .pill-rating-4 { background:#34d399; color:#064e3b; border-color:#34d399; }
     .pill-rating-3 { background:#f59e0b; color:#fff; border-color:#f59e0b; }
 
-    /* Member tag (index + color) */
-    .mchip {
-      display:inline-flex; align-items:center; gap:6px; padding:3px 7px;
-      border-radius:12px; font-size:0.78rem; font-weight:800; color:#0f172a;
-      border: 1px solid rgba(0,0,0,0.06);
-    }
-    .mchip .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
-
-    /* Tables (kept from previous, slightly compact) */
+    /* Tables */
     .comparison-table {
       background: white; border-radius: 15px; overflow: hidden;
       box-shadow: 0 8px 25px rgba(0,0,0,0.08); margin-bottom: 22px;
@@ -154,21 +138,13 @@
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7f0; vertical-align: top; }
     th { background: #f8fafc; font-weight: 800; color: #1f2937; }
     tr:hover { background: #f7fafc; }
-    .answer-block {
-      background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:6px 8px; margin:4px 0;
-    }
-    .answer-block .text {
-      color:#111827; margin-bottom:4px; line-height:1.35;
-    }
+    .answer-block { background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:6px 8px; margin:4px 0; }
+    .answer-block .text { color:#111827; margin-bottom:4px; line-height:1.35; }
 
     @media (max-width: 768px) {
       .dashboard-container { margin: 10px; border-radius: 15px; }
       .content { padding: 18px; }
-      .header { padding: 20px; }
-      .header h1 { font-size: 1.8rem; }
-      .metrics-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
       .team-card { height: auto; }
-      .row { grid-template-columns: 130px 1fr; }
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -176,8 +152,8 @@
 <body>
 <div class="dashboard-container">
   <div class="header">
-    <h1>🚀 SCG AI-First Sprint 1 Feedback Dashboard</h1>
-    <p>Team cards: stacked content, clear per-member pills</p>
+    <h1>SCG AI-First Sprint 1 Feedback Dashboard</h1>
+    <p>Cards with stacked sections and per-member pills</p>
   </div>
 
   <div class="content">
@@ -191,13 +167,13 @@
 
     <!-- Team Overview Cards -->
     <div class="section">
-      <h2 class="section-title">📊 Team Overview</h2>
+      <h2 class="section-title">Team Overview</h2>
       <div class="team-comparison" id="team-cards"></div>
     </div>
 
-    <!-- Detailed tables (unchanged content, compact look) -->
+    <!-- Detailed comparison tables (kept) -->
     <div class="section">
-      <h2 class="section-title">📋 Detailed Feedback Comparison</h2>
+      <h2 class="section-title">Detailed Feedback Comparison</h2>
       <div class="comparison-table">
         <div class="table-header">Sprint Experience & Challenges</div>
         <table><thead><tr><th>Team</th><th>What Worked Best</th><th>Biggest Challenge</th><th>Suggestions for Improvement</th></tr></thead><tbody id="table-experience"></tbody></table>
@@ -219,7 +195,6 @@
   const CSV_URL = 'Sprint 1 Feedback Form-68b904bdfedea2208c5b26ab.csv';
   const HEADER_START = 'Response ID';
 
-  // Known team headcount map (for X / Y responded)
   const TEAM_HEADCOUNT = new Map([
     ['AI', 2], ['AI AHA', 3], ['AI Can Do It', 2], ['AI Frontiers', 3],
     ['AI Newcomer', 3], ['AI-YOYO', 3], ['Bright Bytes', 3],
@@ -236,7 +211,6 @@
 
   const COLS = {
     id: 'Response ID',
-    ts: 'Timestamp',
     team: 'Which Sprint team are you from?',
     division: 'Which division are you from?',
     rating: 'On a scale of 1-5, how would you rate your SCG AI-First Sprint Experience?',
@@ -257,14 +231,6 @@
   const txt = (v) => (v == null ? '' : String(v).trim());
   const parseRating = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
 
-  // Palette for member dots
-  const MEMBER_COLORS = [
-    '#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9',
-    '#BBDEFB', '#B3E5FC', '#B2EBF2', '#B2DFDB', '#C8E6C9',
-    '#DCEDC8', '#F0F4C3', '#FFF9C4', '#FFECB3', '#FFE0B2',
-    '#FFCCBC', '#D7CCC8', '#CFD8DC'
-  ];
-
   const groupByTeam = (rows) => {
     const map = new Map();
     for (const r of rows) {
@@ -275,30 +241,28 @@
     return map;
   };
 
-  function memberColor(idx) { return MEMBER_COLORS[idx % MEMBER_COLORS.length]; }
-
   function pillClassForContinue(value) {
     const v = txt(value).toLowerCase();
     if (v.startsWith('yes')) return 'pill-green';
     if (v.startsWith('maybe')) return 'pill-amber';
     if (v.startsWith('no')) return 'pill-red';
-    return 'pill-soft';
-    }
+    return '';
+  }
   function pillClassForAdoption(value) {
     const v = txt(value).toLowerCase();
-    if (!v) return 'pill-soft';
+    if (!v) return '';
     if (v.startsWith("i'll definitely")) return 'pill-teal';
     if (v.startsWith('my immediate team')) return 'pill-blue';
     if (v.startsWith('some people')) return 'pill-green';
     if (v.startsWith('no one')) return 'pill-red';
-    return 'pill-soft';
+    return '';
   }
   function pillClassForFollowup(value) {
     const v = txt(value).toLowerCase();
     if (v === 'yes') return 'pill-green';
     if (v === 'maybe') return 'pill-amber';
     if (v === 'no') return 'pill-red';
-    return 'pill-soft';
+    return '';
   }
   function pillClassForRating(n) {
     if (n >= 5) return 'pill-rating-5';
@@ -307,7 +271,7 @@
   }
 
   function render(rows) {
-    // Trim any preface lines
+    // Ensure we're after the header and have valid rows
     rows = rows.filter(r => txt(r[COLS.id]) && txt(r[COLS.team]));
 
     // Metrics
@@ -330,7 +294,7 @@
     document.getElementById('continuation-rate').textContent = contRate != null ? `${contRate}%` : '-';
     document.getElementById('adoption-rate').textContent = adoptionRate != null ? `${adoptionRate}%` : '-';
 
-    // Team cards
+    // Cards
     const byTeam = groupByTeam(rows);
     const teamCards = document.getElementById('team-cards');
     teamCards.innerHTML = '';
@@ -338,71 +302,30 @@
     [...byTeam.entries()].sort((a,b) => a[0].localeCompare(b[0])).forEach(([teamName, teamRows]) => {
       const teamTotal = TEAM_HEADCOUNT.get(teamName);
       const responded = `${teamRows.length}${teamTotal ? ` / ${teamTotal}` : ''}`;
+      const division = txt(teamRows[0][COLS.division]) || '—';
 
-      // Build pill groups per row with member index + color
-      function buildMemberPills(key, pillClassFn, valueTransform = (v)=>v) {
-        return teamRows.map((r, idx) => {
-          const val = txt(r[key]);
-          if (!val) return '';
-          const display = valueTransform(val);
-          const color = memberColor(idx);
-          const rid = txt(r[COLS.id]);
-          return `
-            <span class="mchip pill ${pillClassFn(val)}" title="ID: ${rid}">
-              <span class="dot" style="background:${color};"></span>
-              <span>#${idx+1}</span>
-              <span>${display}</span>
-            </span>
-          `;
-        }).filter(Boolean).join('');
-      }
-
-      // Timestamp pills (formatted)
-      function fmtTs(s) {
-        const raw = txt(s);
-        if (!raw) return '';
-        // keep your provided format; if parseable, render weekday prefix
-        try {
-          const d = new Date(raw.replace(' AM',' AM').replace(' PM',' PM'));
-          if (!isNaN(d.getTime())) {
-            return d.toLocaleString('en-SG', { weekday:'short', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true });
-          }
-        } catch {}
-        return raw; // fallback
-      }
-
-      const tsPills = teamRows.map((r, idx) => {
-        const color = memberColor(idx);
-        const rid = txt(r[COLS.id]);
-        return `
-          <span class="mchip pill pill-soft" title="ID: ${rid}">
-            <span class="dot" style="background:${color};"></span>
-            <span>#${idx+1}</span>
-            <span>${fmtTs(r[COLS.ts])}</span>
-          </span>
-        `;
-      }).join('');
-
-      // Rating pills
+      // Build pills for each section; each pill shows just #index and the value
       const ratingPills = teamRows.map((r, idx) => {
         const n = parseRating(r[COLS.rating]);
         if (n == null) return '';
-        const color = memberColor(idx);
         const rid = txt(r[COLS.id]);
-        return `
-          <span class="mchip pill ${pillClassForRating(n)}" title="ID: ${rid}">
-            <span class="dot" style="background:${color};"></span>
-            <span>#${idx+1}</span>
-            <span>${n.toFixed(1)}</span>
-          </span>
-        `;
+        return `<span class="pill ${pillClassForRating(n)}" title="ID: ${rid}">#${idx+1} ${n.toFixed(1)}</span>`;
       }).join('');
-
-      const continuePills = buildMemberPills(COLS.continue, pillClassForContinue);
-      const adoptionPills = buildMemberPills(COLS.adoption, pillClassForAdoption);
-      const followupPills = buildMemberPills(COLS.followup, pillClassForFollowup);
-
-      const division = txt(teamRows[0][COLS.division]) || '—';
+      const continuePills = teamRows.map((r, idx) => {
+        const v = txt(r[COLS.continue]); if (!v) return '';
+        const rid = txt(r[COLS.id]);
+        return `<span class="pill ${pillClassForContinue(v)}" title="ID: ${rid}">#${idx+1} ${v}</span>`;
+      }).join('');
+      const adoptionPills = teamRows.map((r, idx) => {
+        const v = txt(r[COLS.adoption]); if (!v) return '';
+        const rid = txt(r[COLS.id]]);
+        return `<span class="pill ${pillClassForAdoption(v)}" title="ID: ${rid}">#${idx+1} ${v}</span>`;
+      }).join('');
+      const followupPills = teamRows.map((r, idx) => {
+        const v = txt(r[COLS.followup]); if (!v) return '';
+        const rid = txt(r[COLS.id]]);
+        return `<span class="pill ${pillClassForFollowup(v)}" title="ID: ${rid}">#${idx+1} ${v}</span>`;
+      }).join('');
 
       const card = el(`
         <div class="team-card">
@@ -416,24 +339,20 @@
 
           <div class="stack">
             <div class="row">
-              <div class="label">Timestamp</div>
-              <div class="pill-group">${tsPills || '<span class="pill pill-soft">—</span>'}</div>
-            </div>
-            <div class="row">
               <div class="label">Rating</div>
-              <div class="pill-group">${ratingPills || '<span class="pill pill-soft">—</span>'}</div>
+              <div class="pill-group">${ratingPills || '<span class="pill">—</span>'}</div>
             </div>
             <div class="row">
               <div class="label">Continue Beyond Sprint</div>
-              <div class="pill-group">${continuePills || '<span class="pill pill-soft">—</span>'}</div>
+              <div class="pill-group">${continuePills || '<span class="pill">—</span>'}</div>
             </div>
             <div class="row">
               <div class="label">Adoption Level</div>
-              <div class="pill-group">${adoptionPills || '<span class="pill pill-soft">—</span>'}</div>
+              <div class="pill-group">${adoptionPills || '<span class="pill">—</span>'}</div>
             </div>
             <div class="row">
               <div class="label">Follow-up Interest</div>
-              <div class="pill-group">${followupPills || '<span class="pill pill-soft">—</span>'}</div>
+              <div class="pill-group">${followupPills || '<span class="pill">—</span>'}</div>
             </div>
           </div>
         </div>
@@ -442,7 +361,7 @@
       teamCards.appendChild(card);
     });
 
-    // Tables (reuse compact grouped answers for richer context)
+    // Tables (unchanged logic)
     const tbodyExp = document.getElementById('table-experience');
     const tbodyFuture = document.getElementById('table-future');
     const tbodySupport = document.getElementById('table-support');
@@ -467,19 +386,17 @@
 
     function respondentLegend(teamRows) {
       return teamRows.map((r, idx) => {
-        const color = memberColor(idx);
         const rid = txt(r[COLS.id]);
-        return `<span title="ID ${rid}" class="mchip" style="background:#fff;"><span class="dot" style="background:${color};"></span>#${idx+1}</span>`;
+        return `<span class="pill" title="ID ${rid}">#${idx+1}</span>`;
       }).join('');
     }
 
     function renderAnswerCell(teamRows, key) {
       const grouped = groupAnswersWithMembers(teamRows, key);
       return [...grouped.entries()].map(([answer, members]) => {
-        const chips = members.map(({idx, id}) => {
-          const color = memberColor(idx);
-          return `<span class="mchip" title="ID: ${id}"><span class="dot" style="background:${color};"></span>#${idx+1}</span>`;
-        }).join('');
+        const chips = members.map(({idx, id}) =>
+          `<span class="pill" title="ID: ${id}">#${idx+1}</span>`
+        ).join('');
         return `<div class="answer-block"><div class="text">${answer}</div><div>${chips}</div></div>`;
       }).join('');
     }
@@ -489,7 +406,7 @@
         <td>
           <strong>${team}</strong><br/>
           <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
-          <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
+          <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">${respondentLegend(teamRows)}</div>
         </td>
         <td>${renderAnswerCell(teamRows, COLS.worked)}</td>
         <td>${renderAnswerCell(teamRows, COLS.challenge)}</td>
@@ -502,7 +419,7 @@
         <td>
           <strong>${team}</strong><br/>
           <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
-          <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
+          <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">${respondentLegend(teamRows)}</div>
         </td>
         <td>${renderAnswerCell(teamRows, COLS.vision)}</td>
         <td>${renderAnswerCell(teamRows, COLS.steps)}</td>
@@ -515,7 +432,7 @@
         <td>
           <strong>${team}</strong><br/>
           <span style="color:#6b7280; font-size:0.85rem;">respondents: ${teamRows.length}${TEAM_HEADCOUNT.has(team) ? ` / ${TEAM_HEADCOUNT.get(team)}` : ''}</span><br/>
-          <div style="margin-top:4px;">${respondentLegend(teamRows)}</div>
+          <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">${respondentLegend(teamRows)}</div>
         </td>
         <td>${renderAnswerCell(teamRows, COLS.support)}</td>
         <td>${renderAnswerCell(teamRows, COLS.barriers)}</td>
@@ -523,12 +440,12 @@
     `).join('');
   }
 
-  // Load CSV (skip any preface before the actual header row)
+  // Load CSV
   fetch(CSV_URL)
     .then(resp => resp.ok ? resp.text() : Promise.reject(new Error(`HTTP ${resp.status}`)))
     .then(text => {
       const lines = text.split(/\r?\n/);
-      const headerIdx = lines.findIndex(l => l.split(',')[0].trim() === HEADER_START);
+      const headerIdx = lines.findIndex(l => l.split(',')[0].trim() === 'Response ID');
       if (headerIdx === -1) throw new Error('Could not find header row starting with "Response ID".');
       const trimmed = lines.slice(headerIdx).join('\n');
       Papa.parse(trimmed, {
