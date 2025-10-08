@@ -129,7 +129,8 @@
     .pill-rating-5 { background:#10b981; color:#fff; border-color:#10b981; }
     .pill-rating-4 { background:#34d399; color:#064e3b; border-color:#34d399; }
     .pill-rating-3 { background:#f59e0b; color:#fff; border-color:#f59e0b; }
-
+    .pill-soft { background:#fef3c7; color:#92400e; border-color:#fde68a; }
+    
     /* Member tag for TEAM CARDS - no dots, cleaner look */
     .mchip-card {
       display:inline-flex; align-items:center; gap:4px; padding:3px 7px;
@@ -284,7 +285,7 @@
   function pillClassForContinue(value) {
     const v = txt(value).toLowerCase();
     if (v.startsWith('yes')) return 'pill-green';
-    if (v.startsWith('maybe') || v.startsWith('unsure')) return 'pill-amber';
+    if (v.startsWith('maybe')) return 'pill-amber';
     if (v.startsWith('no')) return 'pill-red';
     return 'pill-soft';
     }
