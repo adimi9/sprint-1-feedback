@@ -619,6 +619,20 @@ The solution works well for me. No immediate further problem or enhancement requ
 </div>
 </body>
     <script>
+        (async function () {
+  function fail(msg, e) {
+    console.error('[Dashboard]', msg, e || '');
+    alert(msg);
+  }
+
+  let resp, text;
+  try {
+    resp = await fetch('Sprint 1 Feedback Form-68b904bdfedea2208c5b26ab.csv');
+    if (!resp.ok) return fail(`CSV fetch failed (${resp.status}). Check the file path/name and that you are serving over http(s), not file://`);
+    text = await resp.text();
+  } catch (e) {
+    return fail('CSV fetch threw an error. Are you opening the HTML via file:// ? Please use a local server.', e);
+  }
     // Minimal CSV parser (handles quoted commas and newlines)
     function parseCSV(text) {
       const rows = [];
