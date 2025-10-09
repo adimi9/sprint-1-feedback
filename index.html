@@ -782,8 +782,7 @@ function switchTab(tabName) {
   - For quick local testing, set USE_SECURE_PROXY = false and put your OpenAI API key in OPENAI_API_KEY (not recommended beyond testing).
 */
 
-const USE_SECURE_PROXY = false;  // true = use your backend at /chat (recommended). false = browser calls OpenAI directly (testing only).
-const OPENAI_API_KEY = "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";      // Only used if USE_SECURE_PROXY=false (testing). Leave blank otherwise.
+const USE_SECURE_PROXY = true;  // true = use your backend at /chat (recommended). false = browser calls OpenAI directly (testing only).
 const OPENAI_MODEL = "gpt-4o-mini"; // small+fast; you can change to "gpt-4o" for higher quality
 
 // 1) Minimal UI
