@@ -313,7 +313,8 @@
     </div>
   </div>
 </div>
-
+  <!-- Chatbot Widget -->
+<div id="chatbot-root" style="all: initial;"></div>
 <script>
 // Tab switching
 function switchTab(tabName) {
@@ -768,6 +769,267 @@ function switchTab(tabName) {
     })
     .catch(err => { console.error('CSV load error:', err); alert('Failed to load CSV. Check path/CORS.'); });
 })();
+</script>
+  <script>
+/*
+  SCG Dashboard Chatbot
+  - Builds context from the same parsed CSV rows (RAW_ROWS) already in your page
+  - Answers questions grounded in that data
+  - OpenAI call: choose either direct client call (testing) or secure proxy (production)
+
+  IMPORTANT:
+  - For production, set USE_SECURE_PROXY = true and implement the /chat endpoint as shown below.
+  - For quick local testing, set USE_SECURE_PROXY = false and put your OpenAI API key in OPENAI_API_KEY (not recommended beyond testing).
+*/
+
+const USE_SECURE_PROXY = false;  // true = use your backend at /chat (recommended). false = browser calls OpenAI directly (testing only).
+const OPENAI_API_KEY = "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";      // Only used if USE_SECURE_PROXY=false (testing). Leave blank otherwise.
+const OPENAI_MODEL = "gpt-4o-mini"; // small+fast; you can change to "gpt-4o" for higher quality
+
+// 1) Minimal UI
+(function initChatbotUI() {
+  const root = document.getElementById('chatbot-root');
+  root.innerHTML = `
+    <style>
+      .scg-chat-btn {
+        position: fixed; right: 20px; bottom: 20px; width: 56px; height: 56px;
+        border-radius: 50%; background: linear-gradient(135deg,#4facfe,#00f2fe);
+        box-shadow: 0 10px 24px rgba(0,0,0,0.15); color: white; border: none;
+        cursor: pointer; font-size: 22px; display:flex; align-items:center; justify-content:center; z-index: 999999;
+      }
+      .scg-chat-panel {
+        position: fixed; right: 20px; bottom: 88px; width: 360px; max-height: 60vh;
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 14px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.18); overflow: hidden; display: none; z-index: 999999;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        color: #0f172a;
+      }
+      .scg-chat-header {
+        padding: 12px 14px; background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; font-weight: 700;
+        display:flex; align-items:center; justify-content: space-between;
+      }
+      .scg-chat-body {
+        padding: 12px; overflow: auto; max-height: 46vh; background: #fafafa;
+      }
+      .scg-chat-msg { margin: 8px 0; }
+      .scg-chat-msg.user { text-align: right; }
+      .scg-bubble {
+        display: inline-block; padding: 8px 10px; border-radius: 10px; max-width: 85%; line-height: 1.35;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      }
+      .scg-bubble.user { background: #e0f2fe; color: #075985; }
+      .scg-bubble.bot  { background: #f1f5f9; color: #0f172a; }
+      .scg-chat-input {
+        display:flex; gap: 8px; padding: 10px; border-top: 1px solid #e5e7eb; background:#fff;
+      }
+      .scg-chat-input input {
+        flex:1; padding: 10px; border-radius: 10px; border: 1px solid #e5e7eb; outline: none;
+      }
+      .scg-chat-input button {
+        background: #4facfe; color: #fff; border: none; border-radius: 10px; padding: 10px 12px; cursor: pointer;
+      }
+      .scg-close {
+        background: transparent; color: #fff; border: none; font-size: 18px; cursor: pointer;
+      }
+      .scg-note { font-size: 12px; color: #6b7280; margin-top: 4px; }
+    </style>
+    <button class="scg-chat-btn" title="Ask about this dashboard">💬</button>
+    <div class="scg-chat-panel" role="dialog" aria-label="SCG AI Chat">
+      <div class="scg-chat-header">
+        <div>SCG AI Chat</div>
+        <button class="scg-close" title="Close">✕</button>
+      </div>
+      <div class="scg-chat-body" id="scg-chat-body">
+        <div class="scg-chat-msg">
+          <div class="scg-bubble bot">
+            Hi! Ask me anything about this dashboard data. For example:
+            <div class="scg-note">• What’s the average rating in Procurement?<br/>• Which teams plan to continue beyond the sprint?<br/>• Summarise top challenges and suggestions.</div>
+          </div>
+        </div>
+      </div>
+      <div class="scg-chat-input">
+        <input id="scg-chat-input" placeholder="Type your question..." />
+        <button id="scg-chat-send">Send</button>
+      </div>
+    </div>
+  `;
+
+  const btn = root.querySelector('.scg-chat-btn');
+  const panel = root.querySelector('.scg-chat-panel');
+  const closeBtn = root.querySelector('.scg-close');
+  btn.addEventListener('click', ()=> { panel.style.display = panel.style.display==='block' ? 'none' : 'block'; });
+  closeBtn.addEventListener('click', ()=> panel.style.display='none');
+
+  const input = root.querySelector('#scg-chat-input');
+  const sendBtn = root.querySelector('#scg-chat-send');
+  sendBtn.addEventListener('click', onSend);
+  input.addEventListener('keydown', (e)=> { if (e.key==='Enter') onSend(); });
+
+  function appendMsg(role, text) {
+    const body = root.querySelector('#scg-chat-body');
+    const msg = document.createElement('div');
+    msg.className = 'scg-chat-msg ' + (role==='user' ? 'user' : 'bot');
+    const bubble = document.createElement('div');
+    bubble.className = 'scg-bubble ' + (role==='user' ? 'user' : 'bot');
+    bubble.textContent = text;
+    msg.appendChild(bubble);
+    body.appendChild(msg);
+    body.scrollTop = body.scrollHeight;
+    return bubble;
+  }
+
+  // 2) Build the in-memory context from RAW_ROWS (which your page sets when CSV loads)
+  function getContextSlices() {
+    // If your data hasn’t loaded yet, return empty
+    if (!window.RAW_ROWS || !Array.isArray(window.RAW_ROWS) || !window.RAW_ROWS.length) return [];
+
+    const COLS = window.COLS || {};
+    const rows = window.RAW_ROWS;
+
+    // Create concise per-row slices to keep prompt size small but useful
+    const slices = rows.map(r => {
+      const o = {
+        team: (r[COLS.team] || '').trim(),
+        division: (r[COLS.division] || '').trim(),
+        rating: (r[COLS.rating] || '').toString().trim(),
+        adoption: (r[COLS.adoption] || '').trim(),
+        continue: (r[COLS.continue] || '').trim(),
+        worked: (r[COLS.worked] || '').trim(),
+        challenge: (r[COLS.challenge] || '').trim(),
+        better: (r[COLS.better] || '').trim(),
+        vision: (r[COLS.vision] || '').trim(),
+        steps: (r[COLS.steps] || '').trim(),
+        timeline: (r[COLS.timeline] || '').trim(),
+        support: (r[COLS.support] || '').trim(),
+        barriers: (r[COLS.barriers] || '').trim()
+      };
+      return JSON.stringify(o);
+    });
+
+    // Cap to avoid hitting token limits; adjust as needed
+    const MAX_SLICES = 300;
+    return slices.slice(0, MAX_SLICES);
+  }
+
+  // 3) Simple retrieval: pick top-N relevant slices by keyword scoring
+  function retrieveRelevantSlices(question, slices, topN=30) {
+    const q = question.toLowerCase();
+    const score = (s) => {
+      // naive scoring by field hints
+      let sc = 0;
+      const add = (w, v=1) => { if (q.includes(w)) sc += v; };
+      add('rating', 2);
+      add('average', 1);
+      add('continue', 2);
+      add('adoption', 2);
+      add('division', 1);
+      add('procurement', 3);
+      add('finance', 3);
+      add('org excellence', 3);
+      add('digital governance', 3);
+      add('challenge', 2);
+      add('worked', 1);
+      add('suggestion', 1);
+      add('support', 1);
+      add('barrier', 1);
+      // basic keyword overlap
+      const lc = s.toLowerCase();
+      const tokens = q.split(/\W+/).filter(Boolean);
+      tokens.forEach(t => { if (lc.includes(t)) sc += 0.2; });
+      return sc;
+    };
+    return slices
+      .map(s => ({ s, sc: score(s) }))
+      .sort((a,b)=>b.sc - a.sc)
+      .slice(0, topN)
+      .map(x => x.s);
+  }
+
+  async function callOpenAI(messages, abortSignal) {
+    if (!USE_SECURE_PROXY) {
+      if (!OPENAI_API_KEY) throw new Error("Missing OPENAI_API_KEY for testing mode.");
+      // Direct client call (testing only)
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + OPENAI_API_KEY
+        },
+        body: JSON.stringify({
+          model: OPENAI_MODEL,
+          messages,
+          temperature: 0.2
+        }),
+        signal: abortSignal
+      });
+      if (!res.ok) throw new Error("OpenAI error: " + res.status);
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content || "No response.";
+    } else {
+      // Secure proxy call to your backend
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: OPENAI_MODEL, messages }),
+        signal: abortSignal
+      });
+      if (!res.ok) throw new Error("Proxy error: " + res.status);
+      const data = await res.json();
+      return data.answer || "No response.";
+    }
+  }
+
+  let currentAbort = null;
+
+  async function onSend() {
+    const inputEl = root.querySelector('#scg-chat-input');
+    const q = (inputEl.value || "").trim();
+    if (!q) return;
+
+    // Show user message
+    appendMsg('user', q);
+    inputEl.value = '';
+
+    // Build prompt with small retrieval context
+    const slices = getContextSlices();
+    const relevant = retrieveRelevantSlices(q, slices, 40);
+
+    const systemPrompt = `
+You are a helpful analyst for the "SCG AI-First Sprint 1 Feedback Dashboard".
+Answer strictly based on the provided JSONL context slices from the dashboard's CSV data.
+If the question asks for numbers (averages, counts, rates), derive them logically from the slices or explain limitations.
+If information is insufficient, say so briefly.
+Be concise and structured. If a division/team is mentioned, filter to those entities.
+`;
+
+    const userPrompt = `
+Question: ${q}
+
+Context slices (JSONL):
+${relevant.join('\n')}
+`;
+
+    const thinkingBubble = appendMsg('bot', 'Thinking...');
+    const controller = new AbortController();
+    currentAbort?.abort();
+    currentAbort = controller;
+
+    try {
+      const answer = await callOpenAI(
+        [
+          { role: "system", content: systemPrompt.trim() },
+          { role: "user", content: userPrompt.trim() }
+        ],
+        controller.signal
+      );
+      thinkingBubble.textContent = answer.trim();
+    } catch (e) {
+      thinkingBubble.textContent = "Sorry, I couldn’t get an answer right now.";
+      console.error(e);
+    }
+  }
+})();
+
 </script>
 </body>
 </html>
