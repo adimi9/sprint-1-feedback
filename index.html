@@ -559,8 +559,8 @@ function switchTab(tabName) {
       return a.startsWith('some people beyond') || a.startsWith('my division loves');
     }).length;
     const adoptionRate = filtered.length ? Math.round((adoptionPos / filtered.length) * 100) : null;
+    document.getElementById('avg-rating').textContent = avg != null ? `${(Math.round(avg * 10) / 10).toFixed(1)} / 5.0` : '-';
 
-    document.getElementById('avg-rating').textContent = avg != null ? (Math.round(avg*10)/10).toFixed(1) : '-';
     document.getElementById('total-responses').textContent = filtered.length;
     document.getElementById('continuation-rate').textContent = contRate != null ? `${contRate}%` : '-';
     document.getElementById('adoption-rate').textContent = adoptionRate != null ? `${adoptionRate}%` : '-';
