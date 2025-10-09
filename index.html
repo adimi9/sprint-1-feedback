@@ -966,7 +966,7 @@ const OPENAI_MODEL = "gpt-4o-mini"; // small+fast; you can change to "gpt-4o" fo
       return data.choices?.[0]?.message?.content || "No response.";
     } else {
       // Secure proxy call to your backend
-      const res = await fetch("/chat", {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: OPENAI_MODEL, messages }),
